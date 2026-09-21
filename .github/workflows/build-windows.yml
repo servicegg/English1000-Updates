@@ -35,6 +35,14 @@ jobs:
         shell: pwsh
         run: Copy-Item app.html build/app/app.html -Force
 
+      - name: Build application icon
+        shell: pwsh
+        run: |
+          python -m pip install pillow
+          python build/icon/make_icon.py
+          go install github.com/akavel/rsrc@latest
+          & "$env:USERPROFILE\go\bin\rsrc.exe" -ico build/app/app.ico -o build/app/rsrc.syso
+
       - name: Build English1000
         shell: pwsh
         run: |
