@@ -25,8 +25,8 @@ import (
 )
 
 const (
-    coreVersion     = "0.8"
-    embeddedVersion = "0.8"
+    coreVersion     = "1.0"
+    embeddedVersion = "1.0"
     manifestURL     = "https://raw.githubusercontent.com/servicegg/English1000-Updates/main/version.json"
     remoteAppURL    = "https://raw.githubusercontent.com/servicegg/English1000-Updates/main/app.html"
     maxHTMLSize     = 2 << 20
@@ -91,6 +91,60 @@ func minimizeWindowForPID(pid int) {
         return 1
     })
     enumWindows.Call(cb, 0)
+}
+
+func findVisibleWindowForPID(pid int) uintptr {
+    if pid <= 0 { return 0 }
+    user32 := syscall.NewLazyDLL("user32.dll")
+    enumWindows := user32.NewProc("EnumWindows")
+    getWindowThreadProcessId := user32.NewProc("GetWindowThreadProcessId")
+    isWindowVisible := user32.NewProc("IsWindowVisible")
+    var found uintptr
+    cb := syscall.NewCallback(func(hwnd uintptr, lparam uintptr) uintptr {
+        var windowPID uint32
+        getWindowThreadProcessId.Call(hwnd, uintptr(unsafe.Pointer(&windowPID)))
+        if int(windowPID)==pid {
+            visible,_,_:=isWindowVisible.Call(hwnd)
+            if visible!=0 { found=hwnd; return 0 }
+        }
+        return 1
+    })
+    enumWindows.Call(cb,0)
+    return found
+}
+
+func makeWindowFramelessForPID(pid int) bool {
+    hwnd:=findVisibleWindowForPID(pid)
+    if hwnd==0 { return false }
+    user32:=syscall.NewLazyDLL("user32.dll")
+    getWindowLongPtr:=user32.NewProc("GetWindowLongPtrW")
+    setWindowLongPtr:=user32.NewProc("SetWindowLongPtrW")
+    setWindowPos:=user32.NewProc("SetWindowPos")
+    const GWL_STYLE = ^uintptr(15)
+    const WS_CAPTION = uintptr(0x00C00000)
+    const WS_SYSMENU = uintptr(0x00080000)
+    const SWP_NOSIZE = uintptr(0x0001)
+    const SWP_NOMOVE = uintptr(0x0002)
+    const SWP_NOZORDER = uintptr(0x0004)
+    const SWP_NOACTIVATE = uintptr(0x0010)
+    const SWP_FRAMECHANGED = uintptr(0x0020)
+    style,_,_:=getWindowLongPtr.Call(hwnd,GWL_STYLE)
+    newStyle:=style &^ WS_CAPTION &^ WS_SYSMENU
+    setWindowLongPtr.Call(hwnd,GWL_STYLE,newStyle)
+    setWindowPos.Call(hwnd,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE|SWP_FRAMECHANGED)
+    return true
+}
+
+func dragWindowForPID(pid int) {
+    hwnd:=findVisibleWindowForPID(pid)
+    if hwnd==0 { return }
+    user32:=syscall.NewLazyDLL("user32.dll")
+    releaseCapture:=user32.NewProc("ReleaseCapture")
+    sendMessage:=user32.NewProc("SendMessageW")
+    const WM_NCLBUTTONDOWN = uintptr(0x00A1)
+    const HTCAPTION = uintptr(2)
+    releaseCapture.Call()
+    sendMessage.Call(hwnd,WM_NCLBUTTONDOWN,HTCAPTION,0)
 }
 
 func findEdge() string {
@@ -174,7 +228,7 @@ func httpClient() *http.Client {
 
 func getBytes(client *http.Client,address string,limit int64)([]byte,error){
     req,err:=http.NewRequest(http.MethodGet,address,nil);if err!=nil{return nil,err}
-    req.Header.Set("User-Agent","English1000-SelfUpdater/0.8")
+    req.Header.Set("User-Agent","English1000-SelfUpdater/1.0")
     req.Header.Set("Cache-Control","no-cache, no-store, must-revalidate")
     req.Header.Set("Pragma","no-cache")
     resp,err:=client.Do(req);if err!=nil{return nil,err}
@@ -267,7 +321,7 @@ func launchCoreUpdater(appDir string,m manifest,staged string) error {
     return cmd.Start()
 }
 
-func startControlServer(hub *eventHub,closeCh chan struct{},minimizeCh chan struct{})(*http.Server,error){
+func startControlServer(hub *eventHub,closeCh chan struct{},minimizeCh chan struct{},dragCh chan struct{})(*http.Server,error){
     mux:=http.NewServeMux()
     mux.HandleFunc("/events",func(w http.ResponseWriter,r *http.Request){
         w.Header().Set("Access-Control-Allow-Origin","*")
@@ -302,6 +356,12 @@ func startControlServer(hub *eventHub,closeCh chan struct{},minimizeCh chan stru
         w.WriteHeader(http.StatusNoContent)
         select{case minimizeCh<-struct{}{}:default:}
     })
+    mux.HandleFunc("/drag",func(w http.ResponseWriter,r *http.Request){
+        w.Header().Set("Access-Control-Allow-Origin","*")
+        w.Header().Set("Access-Control-Allow-Private-Network","true")
+        w.WriteHeader(http.StatusNoContent)
+        select{case dragCh<-struct{}{}:default:}
+    })
     srv:=&http.Server{Addr:controlAddr,Handler:mux,ReadHeaderTimeout:2*time.Second}
     ln,err:=net.Listen("tcp",controlAddr);if err!=nil{return nil,err}
     go func(){_=srv.Serve(ln)}()
@@ -330,8 +390,9 @@ func main(){
 
     closeCh:=make(chan struct{},2)
     minimizeCh:=make(chan struct{},2)
+    dragCh:=make(chan struct{},2)
     hub:=newEventHub()
-    srv,err:=startControlServer(hub,closeCh,minimizeCh)
+    srv,err:=startControlServer(hub,closeCh,minimizeCh,dragCh)
     if err!=nil{messageBox("English 1000","Не удалось запустить модуль мгновенных обновлений. Закрой другие копии English 1000 и попробуй снова.");return}
     defer func(){
         ctx,cancel:=context.WithTimeout(context.Background(),500*time.Millisecond)
@@ -351,6 +412,17 @@ func main(){
     cmd:=exec.Command(edge,"--app="+u.String(),"--user-data-dir="+profileDir,"--no-first-run","--disable-features=msEdgeSidebarV2")
     cmd.SysProcAttr=&syscall.SysProcAttr{HideWindow:true}
     if err:=cmd.Start();err!=nil{messageBox("English 1000",fmt.Sprintf("Не удалось открыть приложение:\n%v",err));return}
+    go func(){
+        deadline:=time.Now().Add(5*time.Second)
+        for time.Now().Before(deadline) {
+            if makeWindowFramelessForPID(cmd.Process.Pid) {
+                logLine(appDir,"frameless window enabled")
+                return
+            }
+            time.Sleep(120*time.Millisecond)
+        }
+        logLine(appDir,"frameless window not found; using normal frame")
+    }()
     go func(){_=cmd.Wait();select{case closeCh<-struct{}{}:default:}}()
 
     ticker:=time.NewTicker(pollInterval)
@@ -375,6 +447,8 @@ func main(){
             if changed{hub.broadcast(installed)}
         case <-minimizeCh:
             minimizeWindowForPID(cmd.Process.Pid)
+        case <-dragCh:
+            dragWindowForPID(cmd.Process.Pid)
         case <-closeCh:
             return
         }
