@@ -6,8 +6,11 @@ on:
     branches: [ main ]
     paths:
       - 'build/**'
-      - 'app.html'
       - '.github/workflows/build-windows.yml'
+
+concurrency:
+  group: english1000-windows-build
+  cancel-in-progress: true
 
 permissions:
   contents: write
