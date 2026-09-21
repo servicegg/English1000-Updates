@@ -25,8 +25,8 @@ import (
 )
 
 const (
-    coreVersion     = "0.5"
-    embeddedVersion = "0.5"
+    coreVersion     = "0.6"
+    embeddedVersion = "0.6"
     manifestURL     = "https://raw.githubusercontent.com/servicegg/English1000-Updates/main/version.json"
     remoteAppURL    = "https://raw.githubusercontent.com/servicegg/English1000-Updates/main/app.html"
     maxHTMLSize     = 2 << 20
@@ -152,7 +152,7 @@ func httpClient() *http.Client {
 
 func getBytes(client *http.Client,address string,limit int64)([]byte,error){
     req,err:=http.NewRequest(http.MethodGet,address,nil);if err!=nil{return nil,err}
-    req.Header.Set("User-Agent","English1000-SelfUpdater/0.5")
+    req.Header.Set("User-Agent","English1000-SelfUpdater/0.6")
     req.Header.Set("Cache-Control","no-cache, no-store, must-revalidate")
     req.Header.Set("Pragma","no-cache")
     resp,err:=client.Do(req);if err!=nil{return nil,err}
