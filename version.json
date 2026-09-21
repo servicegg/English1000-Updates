@@ -1,4 +1,7 @@
 {
   "version": "0.4",
-  "sha256": "da552b81f4470f7c413d730205dbc6292ebfbafa5c566f9a462a7f1db8ceb14e"
+  "sha256": "da552b81f4470f7c413d730205dbc6292ebfbafa5c566f9a462a7f1db8ceb14e",
+  "exe_version": "0.5",
+  "exe_sha256": "86309c6b85c58816762de096e0fc3d693f48793caf4dd52188afb23aa67002dc",
+  "exe_url": "https://raw.githubusercontent.com/servicegg/English1000-Updates/main/English1000.exe"
 }
