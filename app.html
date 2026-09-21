@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>English1000 v0.7</title>
+<title>English1000 v0.8</title>
 <style>
 :root{
   --bg:#071019;--panel:#0c1723;--line:#22374a;--text:#f5f8fc;--muted:#91a3b8;--blue:#2ea4ff;
@@ -61,7 +61,7 @@
       <button class="navBtn" data-page="stats"><svg class="ico"><use href="#i-chart"/></svg><div class="navText"><strong>Статистика</strong><span>Твой прогресс</span></div></button>
       <button class="navBtn" data-page="settings"><svg class="ico"><use href="#i-settings"/></svg><div class="navText"><strong>Настройки</strong><span>Параметры приложения</span></div></button>
     </nav>
-    <div class="sidebarFoot"><div class="quote">A new language<br>is a new world.<small>Play. Learn. Understand.</small></div><div class="versionTiny">English1000 · v0.7</div></div>
+    <div class="sidebarFoot"><div class="quote">A new language<br>is a new world.<small>Play. Learn. Understand.</small></div><div class="versionTiny">English1000 · v0.8</div></div>
   </aside>
 
   <main class="main">
@@ -171,7 +171,7 @@ var KEY='english1000_progress_v1',LOG_KEY='english1000_safe_log_v1',LOG_LIMIT=15
 function logEvent(type,details){try{var lines=JSON.parse(localStorage.getItem(LOG_KEY)||'[]');lines.push(new Date().toISOString()+' | '+type+(details?' | '+details:''));if(lines.length>LOG_LIMIT)lines=lines.slice(-LOG_LIMIT);localStorage.setItem(LOG_KEY,JSON.stringify(lines));}catch(e){}}
 window.addEventListener('error',function(e){logEvent('js_error',(e.message||'error')+' @ '+(e.filename||'')+':'+(e.lineno||0));});
 window.addEventListener('unhandledrejection',function(e){logEvent('promise_error',String(e.reason||'unknown'));});
-logEvent('app_start','English1000 v0.7 browser='+navigator.userAgent);
+logEvent('app_start','English1000 v0.8 browser='+navigator.userAgent);
 
 var state={stats:{},correct:0,wrong:0,lesson:'1',last:null,direction:'en-ru',seq:0,gameCategory:'combat',favorites:{},autoSpeak:true};
 try{var saved=localStorage.getItem(KEY);if(saved)state=Object.assign(state,JSON.parse(saved));}catch(e){}
@@ -239,8 +239,8 @@ document.getElementById('confirmReset').onclick=function(){state={stats:{},corre
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){if(modal.classList.contains('open')){closeSettings();return;}if(document.fullscreenElement){document.exitFullscreen();return;}}if(modal.classList.contains('open'))return;if(e.key==='ArrowLeft')move(-1);else if(e.key==='ArrowRight')move(1);else if(e.code==='Space'){e.preventDefault();speakCurrent();}else if(e.key==='1')rate('forgot');else if(e.key==='2')rate('hard');else if(e.key==='3')rate('normal');else if(e.key==='4')rate('easy');});
 
-var APP_VERSION='0.7';
-(function enableLiveUpdates(){var retry=null;function connect(){try{var es=new EventSource('http://127.0.0.1:18473/events');es.addEventListener('update',function(ev){try{var d=JSON.parse(ev.data||'{}');logEvent('live_update','to='+(d.version||'?'));}catch(e){}es.close();setTimeout(function(){location.reload();},100);});es.onerror=function(){try{es.close();}catch(e){}clearTimeout(retry);retry=setTimeout(connect,1500);};}catch(e){clearTimeout(retry);retry=setTimeout(connect,1500);}}connect();})();
+var APP_VERSION='0.8';
+(function enableLiveUpdates(){var retry=null;function connect(){try{var es=new EventSource('http://127.0.0.1:18473/events');es.addEventListener('update',function(ev){var d={};try{d=JSON.parse(ev.data||'{}');logEvent('live_update','to='+(d.version||'?'));}catch(e){}es.close();setTimeout(function(){try{var u=new URL(location.href);u.searchParams.set('v',d.version||APP_VERSION);u.searchParams.set('t',Date.now());location.replace(u.toString());}catch(e){location.reload();}},100);});es.onerror=function(){try{es.close();}catch(e){}clearTimeout(retry);retry=setTimeout(connect,1500);};}catch(e){clearTimeout(retry);retry=setTimeout(connect,1500);}}connect();})();
 
 makeSession();render();
 </script>
