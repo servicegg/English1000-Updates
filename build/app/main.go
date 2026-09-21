@@ -25,8 +25,8 @@ import (
 )
 
 const (
-    coreVersion     = "0.7"
-    embeddedVersion = "0.7"
+    coreVersion     = "0.8"
+    embeddedVersion = "0.8"
     manifestURL     = "https://raw.githubusercontent.com/servicegg/English1000-Updates/main/version.json"
     remoteAppURL    = "https://raw.githubusercontent.com/servicegg/English1000-Updates/main/app.html"
     maxHTMLSize     = 2 << 20
@@ -174,7 +174,7 @@ func httpClient() *http.Client {
 
 func getBytes(client *http.Client,address string,limit int64)([]byte,error){
     req,err:=http.NewRequest(http.MethodGet,address,nil);if err!=nil{return nil,err}
-    req.Header.Set("User-Agent","English1000-SelfUpdater/0.7")
+    req.Header.Set("User-Agent","English1000-SelfUpdater/0.8")
     req.Header.Set("Cache-Control","no-cache, no-store, must-revalidate")
     req.Header.Set("Pragma","no-cache")
     resp,err:=client.Do(req);if err!=nil{return nil,err}
@@ -194,18 +194,35 @@ func fetchManifest(client *http.Client)(manifest,error){
     return m,nil
 }
 
+func localFileSHA256(path string) string {
+    b,err:=os.ReadFile(path);if err!=nil{return ""}
+    sum:=sha256.Sum256(b)
+    return hex.EncodeToString(sum[:])
+}
+
 func updateHTML(client *http.Client,appDir,htmlPath,versionPath,installed string,m manifest)(string,bool){
-    if versionParts(m.Version)==nil || compareVersions(m.Version,installed)<=0{return installed,false}
-    if len(strings.TrimSpace(m.SHA256))!=64{logLine(appDir,"html update rejected: invalid sha256");return installed,false}
+    if versionParts(m.Version)==nil{return installed,false}
+    expected:=strings.ToLower(strings.TrimSpace(m.SHA256))
+    if len(expected)!=64{logLine(appDir,"html update rejected: invalid sha256");return installed,false}
+
+    localHash:=strings.ToLower(localFileSHA256(htmlPath))
+    versionCmp:=compareVersions(m.Version,installed)
+    needsUpdate:=versionCmp>0 || localHash=="" || localHash!=expected
+    if !needsUpdate{return installed,false}
+
+    reason:="new version"
+    if versionCmp<=0 && localHash!=expected { reason="hash repair" }
+    logLine(appDir,"html refresh required: "+reason+" local="+localHash+" expected="+expected)
+
     stamp:=strconv.FormatInt(time.Now().UnixNano(),10)
     html,err:=getBytes(client,remoteAppURL+"?v="+url.QueryEscape(m.Version)+"&t="+stamp,maxHTMLSize)
     if err!=nil{logLine(appDir,"html update download failed: "+err.Error());return installed,false}
     sum:=sha256.Sum256(html);got:=hex.EncodeToString(sum[:])
-    if !strings.EqualFold(got,strings.TrimSpace(m.SHA256)){logLine(appDir,"html update rejected: sha256 mismatch");return installed,false}
+    if !strings.EqualFold(got,expected){logLine(appDir,"html update rejected: sha256 mismatch");return installed,false}
     if err:=atomicWrite(htmlPath,html);err!=nil{logLine(appDir,"html update install failed: "+err.Error());return installed,false}
     installed=strings.TrimSpace(m.Version)
     _=os.WriteFile(versionPath,[]byte(installed),0644)
-    logLine(appDir,"updated live HTML to v"+installed)
+    logLine(appDir,"updated/repaired HTML to v"+installed)
     return installed,true
 }
 
@@ -326,6 +343,10 @@ func main(){
     if edge==""{messageBox("English 1000","Microsoft Edge не найден. В Windows 10/11 он обычно установлен по умолчанию.");return}
     abs,err:=filepath.Abs(htmlPath);if err!=nil{abs=htmlPath}
     u:=url.URL{Scheme:"file",Path:filepath.ToSlash(abs)}
+    q:=u.Query()
+    q.Set("v",installed)
+    q.Set("t",strconv.FormatInt(time.Now().UnixNano(),10))
+    u.RawQuery=q.Encode()
     profileDir:=filepath.Join(appDir,"Profile")
     cmd:=exec.Command(edge,"--app="+u.String(),"--user-data-dir="+profileDir,"--no-first-run","--disable-features=msEdgeSidebarV2")
     cmd.SysProcAttr=&syscall.SysProcAttr{HideWindow:true}
