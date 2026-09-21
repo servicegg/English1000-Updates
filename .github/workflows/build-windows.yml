@@ -1,0 +1,71 @@
+name: Build Windows app
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'build/**'
+      - 'app.html'
+      - '.github/workflows/build-windows.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+
+      - name: Build updater
+        shell: pwsh
+        run: |
+          Push-Location build/updater
+          go build -trimpath -ldflags="-H windowsgui -s -w" -o ../app/updater.exe .
+          Pop-Location
+
+      - name: Prepare app HTML
+        shell: pwsh
+        run: Copy-Item app.html build/app/app.html -Force
+
+      - name: Build English1000
+        shell: pwsh
+        run: |
+          Push-Location build/app
+          go build -trimpath -ldflags="-H windowsgui -s -w" -o ../../English1000.exe .
+          Pop-Location
+
+      - name: Update manifest with EXE hash
+        shell: pwsh
+        run: |
+          $sha = (Get-FileHash English1000.exe -Algorithm SHA256).Hash.ToLower()
+          $source = Get-Content build/app/main.go -Raw
+          $m = [regex]::Match($source, 'coreVersion\s*=\s*"([^"]+)"')
+          if (-not $m.Success) { throw "coreVersion not found" }
+          $coreVersion = $m.Groups[1].Value
+          $manifest = Get-Content version.json -Raw | ConvertFrom-Json
+          $manifest | Add-Member -NotePropertyName exe_version -NotePropertyValue $coreVersion -Force
+          $manifest | Add-Member -NotePropertyName exe_sha256 -NotePropertyValue $sha -Force
+          $manifest | Add-Member -NotePropertyName exe_url -NotePropertyValue "https://raw.githubusercontent.com/servicegg/English1000-Updates/main/English1000.exe" -Force
+          $manifest | ConvertTo-Json | Set-Content version.json -Encoding utf8
+
+      - name: Commit built executable
+        shell: pwsh
+        run: |
+          git config user.name "English1000 Builder"
+          git config user.email "actions@users.noreply.github.com"
+          git add English1000.exe version.json
+          git diff --cached --quiet
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "No build changes to commit"
+            exit 0
+          }
+          git commit -m "Build English1000 self-updating executable"
+          git push
