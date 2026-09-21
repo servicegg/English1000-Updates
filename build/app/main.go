@@ -25,8 +25,8 @@ import (
 )
 
 const (
-    coreVersion     = "0.6"
-    embeddedVersion = "0.6"
+    coreVersion     = "0.7"
+    embeddedVersion = "0.7"
     manifestURL     = "https://raw.githubusercontent.com/servicegg/English1000-Updates/main/version.json"
     remoteAppURL    = "https://raw.githubusercontent.com/servicegg/English1000-Updates/main/app.html"
     maxHTMLSize     = 2 << 20
@@ -69,6 +69,28 @@ func messageBox(title, body string) {
     t,_ := syscall.UTF16PtrFromString(body)
     c,_ := syscall.UTF16PtrFromString(title)
     proc.Call(0, uintptr(unsafe.Pointer(t)), uintptr(unsafe.Pointer(c)), 0x10)
+}
+
+func minimizeWindowForPID(pid int) {
+    if pid <= 0 { return }
+    user32 := syscall.NewLazyDLL("user32.dll")
+    enumWindows := user32.NewProc("EnumWindows")
+    getWindowThreadProcessId := user32.NewProc("GetWindowThreadProcessId")
+    isWindowVisible := user32.NewProc("IsWindowVisible")
+    showWindow := user32.NewProc("ShowWindow")
+    cb := syscall.NewCallback(func(hwnd uintptr, lparam uintptr) uintptr {
+        var windowPID uint32
+        getWindowThreadProcessId.Call(hwnd, uintptr(unsafe.Pointer(&windowPID)))
+        if int(windowPID) == pid {
+            visible, _, _ := isWindowVisible.Call(hwnd)
+            if visible != 0 {
+                showWindow.Call(hwnd, 6)
+                return 0
+            }
+        }
+        return 1
+    })
+    enumWindows.Call(cb, 0)
 }
 
 func findEdge() string {
@@ -152,7 +174,7 @@ func httpClient() *http.Client {
 
 func getBytes(client *http.Client,address string,limit int64)([]byte,error){
     req,err:=http.NewRequest(http.MethodGet,address,nil);if err!=nil{return nil,err}
-    req.Header.Set("User-Agent","English1000-SelfUpdater/0.6")
+    req.Header.Set("User-Agent","English1000-SelfUpdater/0.7")
     req.Header.Set("Cache-Control","no-cache, no-store, must-revalidate")
     req.Header.Set("Pragma","no-cache")
     resp,err:=client.Do(req);if err!=nil{return nil,err}
@@ -228,7 +250,7 @@ func launchCoreUpdater(appDir string,m manifest,staged string) error {
     return cmd.Start()
 }
 
-func startControlServer(hub *eventHub,closeCh chan struct{})(*http.Server,error){
+func startControlServer(hub *eventHub,closeCh chan struct{},minimizeCh chan struct{})(*http.Server,error){
     mux:=http.NewServeMux()
     mux.HandleFunc("/events",func(w http.ResponseWriter,r *http.Request){
         w.Header().Set("Access-Control-Allow-Origin","*")
@@ -257,6 +279,12 @@ func startControlServer(hub *eventHub,closeCh chan struct{})(*http.Server,error)
         w.WriteHeader(http.StatusNoContent)
         select{case closeCh<-struct{}{}:default:}
     })
+    mux.HandleFunc("/minimize",func(w http.ResponseWriter,r *http.Request){
+        w.Header().Set("Access-Control-Allow-Origin","*")
+        w.Header().Set("Access-Control-Allow-Private-Network","true")
+        w.WriteHeader(http.StatusNoContent)
+        select{case minimizeCh<-struct{}{}:default:}
+    })
     srv:=&http.Server{Addr:controlAddr,Handler:mux,ReadHeaderTimeout:2*time.Second}
     ln,err:=net.Listen("tcp",controlAddr);if err!=nil{return nil,err}
     go func(){_=srv.Serve(ln)}()
@@ -284,8 +312,9 @@ func main(){
     }
 
     closeCh:=make(chan struct{},2)
+    minimizeCh:=make(chan struct{},2)
     hub:=newEventHub()
-    srv,err:=startControlServer(hub,closeCh)
+    srv,err:=startControlServer(hub,closeCh,minimizeCh)
     if err!=nil{messageBox("English 1000","Не удалось запустить модуль мгновенных обновлений. Закрой другие копии English 1000 и попробуй снова.");return}
     defer func(){
         ctx,cancel:=context.WithTimeout(context.Background(),500*time.Millisecond)
@@ -323,6 +352,8 @@ func main(){
             next,changed:=updateHTML(client,appDir,htmlPath,versionPath,installed,m)
             installed=next
             if changed{hub.broadcast(installed)}
+        case <-minimizeCh:
+            minimizeWindowForPID(cmd.Process.Pid)
         case <-closeCh:
             return
         }
