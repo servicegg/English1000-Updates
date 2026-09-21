@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>English 1000 v0.3</title>
+<title>English 1000 v0.4</title>
 <style>
 :root{--bg:#0f1115;--panel:#171a21;--panel2:#20242d;--text:#f3f5f7;--muted:#9aa3b2;--accent:#6ee7a8;--accent2:#4cc38a;--bad:#ff7b7b;--warn:#ffd166;--line:#2a303b;--shadow:0 18px 55px rgba(0,0,0,.35)}
 *{box-sizing:border-box}
@@ -56,15 +56,15 @@ select,.smallbtn{background:var(--panel2);color:var(--text);border:1px solid var
 <body>
 <div class="app">
   <div class="top">
-    <div class="brand">🇺🇸 English 1000 <span class="version">v0.3</span></div>
+    <div class="brand">🇺🇸 English 1000 <span class="version">v0.4</span></div>
     <div class="controls">
       <button class="smallbtn" id="prevLesson" title="Предыдущий урок">←</button>
       <select id="lesson"></select>
       <button class="smallbtn" id="nextLesson" title="Следующий урок">→</button>
       <button class="smallbtn holdbtn dangerHold" id="reset" title="Удерживай 3 секунды"><span class="holdLabel">Сбросить прогресс</span></button>
-      <button class="closebtn" id="closeApp" title="Закрыть приложение" aria-label="Закрыть приложение">×</button>
       <button class="smallbtn holdbtn" id="exportLog" title="Удерживай 3 секунды"><span class="holdLabel">Скачать лог</span></button>
       <button class="smallbtn" id="fullscreen" title="Переключить полный экран">⛶ Полный экран</button>
+      <button class="closebtn" id="closeApp" title="Закрыть приложение" aria-label="Закрыть приложение">×</button>
     </div>
   </div>
 
@@ -127,7 +127,7 @@ var LOG_LIMIT=1200;
 function logEvent(type,details){try{var lines=JSON.parse(localStorage.getItem(LOG_KEY)||'[]');lines.push(new Date().toISOString()+' | '+type+(details?' | '+details:''));if(lines.length>LOG_LIMIT)lines=lines.slice(lines.length-LOG_LIMIT);localStorage.setItem(LOG_KEY,JSON.stringify(lines));}catch(e){}}
 window.addEventListener('error',function(e){logEvent('js_error',(e.message||'error')+' @ '+(e.filename||'')+':'+(e.lineno||0));});
 window.addEventListener('unhandledrejection',function(e){logEvent('promise_error',String(e.reason||'unknown'));});
-logEvent('app_start','English1000 v0.3 browser='+navigator.userAgent);
+logEvent('app_start','English1000 v0.4 browser='+navigator.userAgent);
 
 var state={stats:{},correct:0,wrong:0,lesson:'1',last:null,direction:'en-ru',seq:0};
 try{var saved=localStorage.getItem(KEY);if(saved)state=Object.assign(state,JSON.parse(saved));}catch(e){}
@@ -173,9 +173,32 @@ setupHoldButton(document.getElementById('reset'),openResetModal);
 document.getElementById('cancelReset').onclick=closeResetModal;
 document.getElementById('confirmReset').onclick=resetProgressNow;
 resetModal.addEventListener('pointerdown',function(e){if(e.target===resetModal)closeResetModal();});
-document.getElementById('closeApp').onclick=function(){logEvent('app_close','button');try{window.open('','_self');window.close();}catch(e){logEvent('app_close_error',String(e));}};
+document.getElementById('closeApp').onclick=function(){logEvent('app_close','button');try{fetch('http://127.0.0.1:18473/close?t='+Date.now(),{mode:'no-cors',keepalive:true}).catch(function(){});}catch(e){}setTimeout(function(){try{window.open('','_self');window.close();}catch(e){logEvent('app_close_error',String(e));}},60);};
 document.getElementById('autoSpeak').onchange=save;
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&resetModal.classList.contains('open')){closeResetModal();return;}if(resetModal.classList.contains('open'))return;if(e.key>='1'&&e.key<='4'){var b=answersEl.querySelectorAll('button')[parseInt(e.key,10)-1];if(b&&!b.disabled)b.click();}else if(e.code==='Space'){e.preventDefault();if(!speakEl.disabled)speakCurrent();}else if(e.key==='n'||e.key==='N'||e.key==='т'||e.key==='Т'){if(!dontKnowEl.disabled)dontKnowEl.click();}});
+var APP_VERSION='0.4';
+(function enableLiveUpdates(){
+  var retryTimer=null;
+  function connect(){
+    try{
+      var es=new EventSource('http://127.0.0.1:18473/events');
+      es.addEventListener('update',function(ev){
+        try{var data=JSON.parse(ev.data||'{}');logEvent('live_update','to='+(data.version||'?'));}catch(e){}
+        es.close();
+        setTimeout(function(){location.reload();},120);
+      });
+      es.onerror=function(){
+        try{es.close();}catch(e){}
+        clearTimeout(retryTimer);
+        retryTimer=setTimeout(connect,1500);
+      };
+    }catch(e){
+      clearTimeout(retryTimer);
+      retryTimer=setTimeout(connect,1500);
+    }
+  }
+  connect();
+})();
 updateStats();renderQuestion();
 </script>
 </body></html>
