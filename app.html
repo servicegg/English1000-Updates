@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>English1000 v1.2</title>
+<title>English1000 v1.3</title>
 <style>
 :root{--bg:#061019;--panel:#0b1722;--line:#27445d;--text:#f5f8fc;--muted:#9badbf;--blue:#22a6ff;--cyan:#53d8ff;--green:#43df88;--orange:#ff9a4a;--red:#ff667c;--sidebar:clamp(330px,22vw,420px)}
 *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#050b11;color:var(--text);font-family:"Segoe UI Variable","Segoe UI",Arial,sans-serif}button,select,input{font:inherit}
@@ -30,6 +30,101 @@
 .modalBackdrop{position:fixed;z-index:2500;inset:0;background:rgba(2,7,11,.8);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:.18s}.modalBackdrop.open{opacity:1;visibility:visible}.modal{width:min(540px,100%);border:1px solid #31506a;background:linear-gradient(180deg,#112638,#091824);border-radius:17px;padding:23px;box-shadow:0 28px 80px rgba(0,0,0,.55)}.modalTop{display:flex;justify-content:space-between}.modal h2{margin:0}.modal p{color:#8ea3b6;font-size:13px}.modalClose{width:38px;height:38px;border-radius:9px;border:1px solid #31485b;background:#0c1b28;cursor:pointer;color:#fff}.settingsGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.setting{border:1px solid #263e51;background:#0b1a27;border-radius:11px;padding:13px}.setting label{display:block;color:#8197ab;font-size:11px;margin-bottom:8px}.setting select{width:100%;background:#122536;color:#edf5fc;border:1px solid #314d64;border-radius:8px;padding:8px}.checkline{display:flex!important;align-items:center;gap:9px;color:#dbe7f2!important;font-size:13px!important}.settingActions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.holdBtn{position:relative;overflow:hidden;isolation:isolate;border:1px solid #334d62;background:#122332;color:#fff;border-radius:10px;padding:11px;cursor:pointer}.holdBtn span{position:relative;z-index:2}.holdBtn:before{content:"";position:absolute;z-index:1;inset:0;transform:scaleX(0);transform-origin:left;background:linear-gradient(90deg,rgba(42,157,244,.15),rgba(42,157,244,.36))}.holdBtn.danger:before{background:linear-gradient(90deg,rgba(245,107,124,.12),rgba(245,107,124,.38))}.holdBtn.holding:before{animation:holdFill 3s linear forwards}@keyframes holdFill{to{transform:scaleX(1)}}.confirmBox{display:none;margin-top:13px;border:1px solid #713943;background:rgba(91,30,42,.24);border-radius:11px;padding:13px}.confirmBox.show{display:block}.confirmActions{display:flex;justify-content:flex-end;gap:8px}.miniBtn{border:1px solid #334b60;background:#112333;color:#fff;border-radius:8px;padding:8px 11px;cursor:pointer}.miniBtn.red{border-color:#7b3d49;background:#45202a}
 @media(max-width:1280px){:root{--sidebar:300px}.brandName{font-size:27px}.navText strong{font-size:16px}.navText span{font-size:12px}.hero h1{font-size:48px}.hero p{font-size:18px}.content{padding-left:28px;padding-right:28px}.studyCard{grid-template-columns:1fr .85fr .72fr;gap:20px;padding-left:48px;padding-right:48px}.gameVisual{max-width:310px}.word{font-size:48px}.translation{font-size:42px}.categories{grid-template-columns:repeat(5,1fr)}}
 @media(max-width:980px){:root{--sidebar:230px}.navText span{display:none}.studyCard{grid-template-columns:1fr .85fr}.translationInfo{grid-column:1/-1;display:grid;grid-template-columns:1fr auto;align-items:center;padding-top:0}.favoriteBtn{position:static;justify-self:end}.translation{margin-top:0}.pos{grid-column:1}.categories{grid-template-columns:repeat(3,1fr)}}</style>
+
+<style id="v13-polish">
+/* v1.3 — reference-detail pass */
+html,body{background:#040a0f}
+.main{position:relative;background:
+  radial-gradient(900px 520px at 66% 13%,rgba(22,74,108,.13),transparent 68%),
+  radial-gradient(760px 540px at 102% 72%,rgba(15,51,77,.12),transparent 66%),
+  linear-gradient(180deg,#07111a 0%,#040b11 55%,#02070b 100%)}
+.main:before{content:"";position:fixed;z-index:0;left:var(--sidebar);right:0;top:248px;bottom:0;pointer-events:none;opacity:.28;
+  background:
+  repeating-linear-gradient(0deg,rgba(255,255,255,.012) 0 1px,transparent 1px 4px),
+  radial-gradient(ellipse at 52% 112%,rgba(17,62,91,.23),transparent 58%)}
+.hero,.content{position:relative;z-index:1}
+.hero{
+  background-size:auto 165%,auto!important;
+  background-position:right 26%,center!important;
+  background-repeat:no-repeat!important;
+  box-shadow:inset 0 -1px rgba(103,145,176,.08),inset 0 -70px 90px rgba(2,9,14,.48)
+}
+.hero:before{background:
+  linear-gradient(90deg,rgba(3,11,18,.96) 0%,rgba(4,13,21,.80) 30%,rgba(5,14,22,.32) 61%,rgba(4,12,19,.16) 100%),
+  linear-gradient(180deg,rgba(2,7,12,.10),transparent 46%,rgba(3,10,16,.62) 100%)}
+.hero:after{height:72px;background:linear-gradient(180deg,transparent,#07111a 92%)}
+.slogan{color:#91a5ba;text-shadow:0 1px 12px rgba(0,0,0,.55)}
+.hero h1{text-shadow:0 4px 28px rgba(0,0,0,.55)}
+.hero p{color:#a2b2c3;text-shadow:0 2px 14px rgba(0,0,0,.45)}
+.sidebar{background:
+  radial-gradient(330px 300px at 50% 92%,rgba(16,66,101,.22),transparent 70%),
+  linear-gradient(180deg,#071522 0%,#06111b 52%,#040c14 100%);
+  box-shadow:16px 0 48px rgba(0,0,0,.26),inset -1px 0 rgba(91,139,176,.06)}
+.sidebar:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.30;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.011) 0 1px,transparent 1px 4px)}
+.sidebar:after{height:41%;opacity:.78;background:
+  linear-gradient(0deg,rgba(9,42,67,.92),transparent 82%);
+  clip-path:polygon(0 65%,6% 57%,12% 70%,19% 48%,27% 67%,34% 42%,41% 61%,49% 34%,56% 57%,64% 45%,72% 67%,80% 47%,88% 69%,94% 56%,100% 64%,100% 100%,0 100%)}
+.brand{border-bottom-color:rgba(85,128,163,.12)}
+.logoIco{filter:drop-shadow(0 0 18px rgba(47,180,255,.32))}
+.navBtn{border-radius:10px}
+.navBtn.active{position:relative;background:
+  linear-gradient(90deg,rgba(12,104,199,.72),rgba(13,61,109,.35));
+  border-color:#209cff;box-shadow:0 0 28px rgba(27,148,255,.13),inset 4px 0 #55ddff,inset 0 1px rgba(255,255,255,.05)}
+.navBtn.active:after{content:"";position:absolute;left:10%;right:10%;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(93,205,255,.52),transparent)}
+.quote{position:relative;overflow:hidden;background:
+  linear-gradient(145deg,rgba(12,31,47,.90),rgba(7,20,31,.88));
+  border-color:#35556f;box-shadow:0 16px 38px rgba(0,0,0,.26),inset 0 1px rgba(255,255,255,.025)}
+.quote:after{content:"🎮";position:absolute;right:14px;bottom:8px;font-size:35px;opacity:.18;filter:grayscale(1)}
+.categories{align-items:stretch}
+.catBtn{position:relative;overflow:hidden;border-color:#253d50;background:
+  linear-gradient(180deg,rgba(17,32,45,.96),rgba(8,20,30,.96));
+  box-shadow:inset 0 1px rgba(255,255,255,.025),0 7px 18px rgba(0,0,0,.08)}
+.catBtn:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,rgba(255,255,255,.018),transparent 38%)}
+.catBtn:hover{border-color:#426985;background:linear-gradient(180deg,rgba(22,42,58,.98),rgba(10,25,37,.98));box-shadow:0 9px 22px rgba(0,0,0,.16)}
+.catBtn.active{background:
+  radial-gradient(circle at 50% 0%,rgba(71,190,255,.25),transparent 55%),
+  linear-gradient(180deg,#126fc9,#0d4f95);
+  border-color:#27a8ff;box-shadow:0 0 22px rgba(26,153,255,.19),inset 0 1px rgba(255,255,255,.11)}
+.catSvg{width:24px;height:24px;color:#b9c9d8;stroke-width:1.75}
+.catBtn.active .catSvg{color:#eaf8ff;filter:drop-shadow(0 0 8px rgba(86,208,255,.42))}
+.studyCard{background:
+  radial-gradient(560px 260px at 51% 46%,rgba(24,78,111,.10),transparent 73%),
+  linear-gradient(180deg,rgba(10,24,36,.985),rgba(6,17,26,.99));
+  border-color:#2b475d;box-shadow:0 28px 72px rgba(0,0,0,.38),inset 0 1px rgba(255,255,255,.025)}
+.studyCard:after{content:"";position:absolute;inset:0;border-radius:16px;pointer-events:none;background:
+  linear-gradient(90deg,rgba(71,160,213,.025),transparent 18%,transparent 82%,rgba(71,160,213,.02))}
+.cardNav{background:linear-gradient(180deg,#12283a,#0d1e2c);border-color:#38576f;box-shadow:0 12px 28px rgba(0,0,0,.35),inset 0 1px rgba(255,255,255,.035)}
+.word{font-weight:760;text-shadow:0 4px 22px rgba(0,0,0,.24)}
+.pronunciation{color:#8fa3b8}
+.badge{gap:7px;background:rgba(14,67,106,.28);border-color:#255a82;box-shadow:inset 0 1px rgba(255,255,255,.025)}
+.badgeSvg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.example{background:linear-gradient(180deg,rgba(17,37,54,.82),rgba(12,28,42,.82));box-shadow:inset 0 1px rgba(255,255,255,.018)}
+.example .highlight{color:#45c5ff;text-shadow:0 0 14px rgba(37,182,255,.20)}
+.gameVisual{background:
+  radial-gradient(circle at 50% 42%,rgba(49,117,160,.18),transparent 36%),
+  linear-gradient(150deg,#142a3a,#08131c 70%);
+  border-color:#38546a;box-shadow:0 18px 40px rgba(0,0,0,.31),inset 0 0 70px rgba(0,0,0,.35)}
+.gameVisual:not(.cat-combat):after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.20;background:
+  linear-gradient(rgba(109,167,204,.08) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(109,167,204,.06) 1px,transparent 1px);
+  background-size:31px 31px}
+.contextIcon{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:90px;height:90px;fill:none;stroke:#a9c8db;stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round;opacity:.76;filter:drop-shadow(0 10px 22px rgba(0,0,0,.52))}
+.gameVisual.cat-combat .contextIcon{display:none}
+.visualHud{z-index:2;border-color:rgba(117,177,217,.28);background:rgba(3,11,17,.76)}
+.visualFooter{z-index:2}
+.favoriteBtn{transition:.15s}
+.favoriteBtn:hover{transform:translateY(-1px)}
+.translation{font-weight:750;text-shadow:0 4px 22px rgba(0,0,0,.22)}
+.pos{background:rgba(14,29,42,.56);border-color:#385167}
+.rateBtn{position:relative;overflow:hidden;box-shadow:inset 0 1px rgba(255,255,255,.035),0 12px 26px rgba(0,0,0,.10)}
+.rateBtn:after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.028),transparent 40%);pointer-events:none}
+.progressBox{background:linear-gradient(180deg,rgba(9,22,33,.96),rgba(6,17,26,.96));border-color:#29445a;box-shadow:inset 0 1px rgba(255,255,255,.02),0 12px 28px rgba(0,0,0,.12)}
+.bar{height:13px;background:#102333;border-color:#2e4b61;box-shadow:inset 0 2px 5px rgba(0,0,0,.36)}
+.bar>div{box-shadow:0 0 15px rgba(46,176,255,.28)}
+.bar.green>div{box-shadow:0 0 15px rgba(63,219,129,.24)}
+@media(max-width:1280px){.hero{background-size:auto 175%!important;background-position:right 26%!important}}
+</style>
 </head>
 <body>
 <svg class="hiddenSymbols" aria-hidden="true">
@@ -43,6 +138,13 @@
   <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.8 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></symbol>
   <symbol id="i-chart" viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></symbol>
   <symbol id="i-settings" viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21h-4v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3h4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.1v4H21a1.7 1.7 0 0 0-1.6 1Z"/></symbol>
+
+  <symbol id="i-coins" viewBox="0 0 24 24"><ellipse cx="9" cy="7" rx="5" ry="2.5"/><path d="M4 7v4c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5V7"/><path d="M10 15c.8 1 2.5 1.6 4.5 1.6 2.8 0 5-1.1 5-2.5v-4"/><ellipse cx="14.5" cy="10" rx="5" ry="2.5"/></symbol>
+  <symbol id="i-hammer" viewBox="0 0 24 24"><path d="m14 5 5 5"/><path d="m12.5 6.5 3-3 5 5-3 3"/><path d="m13.5 10.5-8 8a2 2 0 0 1-3-3l8-8"/></symbol>
+  <symbol id="i-fire" viewBox="0 0 24 24"><path d="M12 22c4 0 7-2.5 7-6.5 0-3.2-2-5.7-4.8-8.5.1 2.2-1 3.5-2.2 4.5.2-3.8-1.8-6.8-4.4-9.5.2 4-2.6 6-2.6 10.2C5 18 8 22 12 22Z"/><path d="M9.2 17c0 2 1.2 3.5 2.8 3.5s2.8-1.3 2.8-3.1c0-1.7-1-3-2.3-4.4.1 1.6-.7 2.5-1.5 3.1.1-1.5-.6-2.7-1.4-3.8-.1 1.8-.4 2.7-.4 4.7Z"/></symbol>
+  <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.7 8.3-2.2 5.2-5.2 2.2 2.2-5.2 5.2-2.2Z"/><path d="M12 3v2M21 12h-2M12 21v-2M3 12h2"/></symbol>
+  <symbol id="i-map" viewBox="0 0 24 24"><path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2V5Z"/><path d="M9 3v16M15 5v16"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
 </svg>
 
 <div class="appShell">
@@ -60,7 +162,7 @@
       <button class="navBtn" data-page="stats"><svg class="ico"><use href="#i-chart"/></svg><div class="navText"><strong>Статистика</strong><span>Твой прогресс</span></div></button>
       <button class="navBtn" data-page="settings"><svg class="ico"><use href="#i-settings"/></svg><div class="navText"><strong>Настройки</strong><span>Параметры приложения</span></div></button>
     </nav>
-    <div class="sidebarFoot"><div class="quote">A new language<br>is a new world.<small>Play. Learn. Understand.</small></div><div class="versionTiny">English1000 · v1.2</div></div>
+    <div class="sidebarFoot"><div class="quote">A new language<br>is a new world.<small>Play. Learn. Understand.</small></div><div class="versionTiny">English1000 · v1.3</div></div>
   </aside>
 
   <main class="main">
@@ -82,7 +184,7 @@
           <div class="badge" id="categoryBadge">⚔ Бой</div>
           <div class="example"><div class="en" id="exampleEn"></div><div class="ru" id="exampleRu"></div></div>
         </div>
-        <div class="visualWrap"><div class="gameVisual" id="gameVisual"><div class="visualHud" id="visualHud">COMBAT</div><div class="visualIcon" id="visualIcon">⚔</div><div class="visualFloat" id="visualFloat">-124</div><div class="visualFooter"><span>GAME CONTEXT</span><span id="visualWord">DAMAGE</span></div></div></div>
+        <div class="visualWrap"><div class="gameVisual" id="gameVisual"><div class="visualHud" id="visualHud">COMBAT</div><svg class="contextIcon" id="visualIcon"><use id="visualIconUse" href="#i-swords"/></svg><div class="visualFloat" id="visualFloat">-124</div><div class="visualFooter"><span>GAME CONTEXT</span><span id="visualWord">DAMAGE</span></div></div></div>
         <div class="translationInfo">
           <button class="favoriteBtn" id="favoriteBtn"><span class="star">☆</span><span>В избранное</span></button>
           <div class="translation" id="translation">урон</div><div class="pos" id="pos">существительное</div>
@@ -131,16 +233,17 @@ var EXTRA_WORDS=[
 for(var exi=0;exi<EXTRA_WORDS.length;exi++)WORDS.push(EXTRA_WORDS[exi]);
 
 var CATEGORY_META={
- all:{label:'Все категории',icon:'▦',hud:'GAME VOCAB',visual:'🎮',float:'XP +25'},
- combat:{label:'Бой',icon:'⚔',hud:'COMBAT',visual:'⚔',float:'-124'},
- inventory:{label:'Инвентарь',icon:'▣',hud:'INVENTORY',visual:'▣',float:''},
- quests:{label:'Квесты',icon:'▤',hud:'QUEST',visual:'▤',float:''},
- dialogue:{label:'Диалоги',icon:'●',hud:'DIALOGUE',visual:'◌',float:''},
- trade:{label:'Торговля',icon:'◉',hud:'TRADE',visual:'◉',float:''},
- craft:{label:'Крафт',icon:'⚒',hud:'CRAFTING',visual:'⚒',float:''},
- survival:{label:'Выживание',icon:'♨',hud:'SURVIVAL',visual:'♨',float:''},
- exploration:{label:'Исследование',icon:'◈',hud:'EXPLORE',visual:'✥',float:''},
- navigation:{label:'Навигация',icon:'◇',hud:'MAP',visual:'⌖',float:''},settings:{label:'Настройки',icon:'⚙',hud:'SETTINGS',visual:'⚙',float:''}
+ all:{label:'Все категории',svg:'i-grid',hud:'GAME VOCAB'},
+ combat:{label:'Бой',svg:'i-swords',hud:'COMBAT'},
+ inventory:{label:'Инвентарь',svg:'i-bag',hud:'INVENTORY'},
+ quests:{label:'Квесты',svg:'i-scroll',hud:'QUEST'},
+ dialogue:{label:'Диалоги',svg:'i-chat',hud:'DIALOGUE'},
+ trade:{label:'Торговля',svg:'i-coins',hud:'TRADE'},
+ craft:{label:'Крафт',svg:'i-hammer',hud:'CRAFTING'},
+ survival:{label:'Выживание',svg:'i-fire',hud:'SURVIVAL'},
+ exploration:{label:'Исследование',svg:'i-compass',hud:'EXPLORE'},
+ navigation:{label:'Навигация',svg:'i-map',hud:'MAP'},
+ settings:{label:'Настройки',svg:'i-settings',hud:'SETTINGS'}
 };
 var GAME_CATEGORIES={
  combat:['damage','weapon','armor','attack','fight','kill','die','protect','defend','hurt','injure','heal','enemy','ammo','reload','stealth','health','pain','danger','safe','strong','weak','soldier','target'],
@@ -171,7 +274,7 @@ var KEY='english1000_progress_v1',LOG_KEY='english1000_safe_log_v1',LOG_LIMIT=15
 function logEvent(type,details){try{var lines=JSON.parse(localStorage.getItem(LOG_KEY)||'[]');lines.push(new Date().toISOString()+' | '+type+(details?' | '+details:''));if(lines.length>LOG_LIMIT)lines=lines.slice(-LOG_LIMIT);localStorage.setItem(LOG_KEY,JSON.stringify(lines));}catch(e){}}
 window.addEventListener('error',function(e){logEvent('js_error',(e.message||'error')+' @ '+(e.filename||'')+':'+(e.lineno||0));});
 window.addEventListener('unhandledrejection',function(e){logEvent('promise_error',String(e.reason||'unknown'));});
-logEvent('app_start','English1000 v1.2 browser='+navigator.userAgent);
+logEvent('app_start','English1000 v1.3 browser='+navigator.userAgent);
 
 var state={stats:{},correct:0,wrong:0,lesson:'1',last:null,direction:'en-ru',seq:0,gameCategory:'combat',favorites:{},autoSpeak:true};
 try{var saved=localStorage.getItem(KEY);if(saved)state=Object.assign(state,JSON.parse(saved));}catch(e){}
@@ -187,21 +290,21 @@ function ensureSession(){var pool=currentPool();if(!Array.isArray(state.session)
 function currentIdx(){ensureSession();return state.session[state.sessionPos];}
 
 var categoriesEl=document.getElementById('categories');
-['all','combat','inventory','quests','dialogue','trade','craft','survival','exploration','navigation','settings'].forEach(function(k){var meta=CATEGORY_META[k],b=document.createElement('button');b.className='catBtn'+(state.gameCategory===k?' active':'');b.dataset.cat=k;b.innerHTML='<span class="catIcon">'+meta.icon+'</span><span>'+meta.label+'</span>';categoriesEl.appendChild(b);});
+['all','combat','inventory','quests','dialogue','trade','craft','survival','exploration','navigation','settings'].forEach(function(k){var meta=CATEGORY_META[k],b=document.createElement('button');b.className='catBtn'+(state.gameCategory===k?' active':'');b.dataset.cat=k;b.innerHTML='<svg class="catSvg ico"><use href="#'+meta.svg+'"/></svg><span>'+meta.label+'</span>';categoriesEl.appendChild(b);});
 categoriesEl.addEventListener('click',function(e){var b=e.target.closest('.catBtn');if(!b)return;if(b.dataset.cat==='settings'){openSettings();return;}state.gameCategory=b.dataset.cat;document.querySelectorAll('.catBtn').forEach(function(x){x.classList.toggle('active',x===b);});makeSession();render();logEvent('category',state.gameCategory);});
 
 var wordEl=document.getElementById('word'),translationEl=document.getElementById('translation'),posEl=document.getElementById('pos'),badgeEl=document.getElementById('categoryBadge'),sessionCountEl=document.getElementById('sessionCount');
 var exampleEn=document.getElementById('exampleEn'),exampleRu=document.getElementById('exampleRu'),favBtn=document.getElementById('favoriteBtn'),pronEl=document.getElementById('pronunciation');
-var visualIcon=document.getElementById('visualIcon'),visualHud=document.getElementById('visualHud'),visualFloat=document.getElementById('visualFloat'),visualWord=document.getElementById('visualWord');
+var visualIcon=document.getElementById('visualIcon'),visualIconUse=document.getElementById('visualIconUse'),visualHud=document.getElementById('visualHud'),visualFloat=document.getElementById('visualFloat'),visualWord=document.getElementById('visualWord');
 
 function render(){
  ensureSession();var idx=currentIdx(),item=WORDS[idx],cat=state.gameCategory==='all'?categoryOfIndex(idx):state.gameCategory,meta=CATEGORY_META[cat]||CATEGORY_META.all,dir=state.direction||'en-ru';
  var shownDir=dir==='mix'?(Math.random()<.5?'en-ru':'ru-en'):dir;state.currentDirection=shownDir;
  if(shownDir==='ru-en'){wordEl.textContent=item.r;translationEl.textContent=item.e;pronEl.textContent='Переведи на английский';}else{wordEl.textContent=item.e;translationEl.textContent=item.r;pronEl.textContent=PHONETICS[item.e.toLowerCase()]||'US English';}
- sessionCountEl.textContent=(state.sessionPos+1)+' / '+state.session.length;badgeEl.textContent=meta.icon+' '+meta.label;posEl.textContent=partOfSpeech(item.e);
+ sessionCountEl.textContent=(state.sessionPos+1)+' / '+state.session.length;badgeEl.innerHTML='<svg class="badgeSvg"><use href="#'+meta.svg+'"/></svg><span>'+meta.label+'</span>';posEl.textContent=partOfSpeech(item.e);
  var ex=exampleFor(item);var needle=item.e,src=ex[0],p=src.toLowerCase().indexOf(needle.toLowerCase());if(p>=0){exampleEn.textContent='';exampleEn.append(document.createTextNode(src.slice(0,p)));var mark=document.createElement('span');mark.className='highlight';mark.textContent=src.slice(p,p+needle.length);exampleEn.append(mark,document.createTextNode(src.slice(p+needle.length)));}else{exampleEn.textContent=src;}exampleRu.textContent=ex[1];
  var favorite=!!state.favorites[idx];favBtn.classList.toggle('on',favorite);favBtn.querySelector('.star').textContent=favorite?'★':'☆';favBtn.querySelector('span:last-child').textContent=favorite?'В избранном':'В избранное';
- gameVisual.className='gameVisual cat-'+cat;visualIcon.textContent=meta.visual;visualHud.textContent=meta.hud;visualFloat.textContent=meta.float;visualWord.textContent=item.e.toUpperCase();updateProgress();save();
+ gameVisual.className='gameVisual cat-'+cat;visualIconUse.setAttribute('href','#'+meta.svg);visualHud.textContent=meta.hud;visualFloat.textContent='';visualWord.textContent=item.e.toUpperCase();updateProgress();save();
  if(state.autoSpeak&&shownDir==='en-ru')setTimeout(speakCurrent,100);
 }
 function speakCurrent(){var item=WORDS[currentIdx()];if(!window.speechSynthesis)return;window.speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(item.e);u.lang='en-US';u.rate=.86;var vs=window.speechSynthesis.getVoices();for(var q=0;q<vs.length;q++){if(/^en-US/i.test(vs[q].lang)){u.voice=vs[q];break;}}window.speechSynthesis.speak(u);}
@@ -240,7 +343,7 @@ document.getElementById('confirmReset').onclick=function(){state={stats:{},corre
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){if(modal.classList.contains('open')){closeSettings();return;}if(document.fullscreenElement){document.exitFullscreen();return;}}if(modal.classList.contains('open'))return;if(e.key==='ArrowLeft')move(-1);else if(e.key==='ArrowRight')move(1);else if(e.code==='Space'){e.preventDefault();speakCurrent();}else if(e.key==='1')rate('forgot');else if(e.key==='2')rate('hard');else if(e.key==='3')rate('normal');else if(e.key==='4')rate('easy');});
 
-var APP_VERSION='1.2';
+var APP_VERSION='1.3';
 (function enableLiveUpdates(){var retry=null;function connect(){try{var es=new EventSource('http://127.0.0.1:18473/events');es.addEventListener('update',function(ev){var d={};try{d=JSON.parse(ev.data||'{}');logEvent('live_update','to='+(d.version||'?'));}catch(e){}es.close();setTimeout(function(){try{var u=new URL(location.href);u.searchParams.set('v',d.version||APP_VERSION);u.searchParams.set('t',Date.now());location.replace(u.toString());}catch(e){location.reload();}},100);});es.onerror=function(){try{es.close();}catch(e){}clearTimeout(retry);retry=setTimeout(connect,1500);};}catch(e){clearTimeout(retry);retry=setTimeout(connect,1500);}}connect();})();
 
 makeSession();render();
