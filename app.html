@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>English1000 v1.6</title>
+<title>English1000 v1.7</title>
 <style>
 :root{--bg:#061019;--panel:#0b1722;--line:#27445d;--text:#f5f8fc;--muted:#9badbf;--blue:#22a6ff;--cyan:#53d8ff;--green:#43df88;--orange:#ff9a4a;--red:#ff667c;--sidebar:clamp(330px,22vw,420px)}
 *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#050b11;color:var(--text);font-family:"Segoe UI Variable","Segoe UI",Arial,sans-serif}button,select,input{font:inherit}
@@ -357,6 +357,147 @@ html,body{min-width:760px;min-height:560px}
   .updateWidget.active{width:44px}.updateMark{margin:auto}
 }
 </style>
+
+<style id="v17-reference-match">
+/* v1.7 — geometry rebuilt from the supplied reference.
+   Sidebar scales primarily from screen height; the learning canvas stops stretching on wide monitors. */
+:root{
+  --sidebar:clamp(240px,33vh,360px);
+  --content-max:1240px;
+  --page-pad-x:clamp(30px,2vw,38px);
+  --hero-h:clamp(205px,22.4vh,242px);
+  --card-h:clamp(338px,33.2vh,360px);
+}
+.appShell{grid-template-columns:var(--sidebar) minmax(0,1fr)}
+.hero{height:var(--hero-h);
+  background-size:auto 170%,auto!important;
+  background-position:right 34%,center!important;
+  box-shadow:inset 0 -1px rgba(118,154,183,.10),inset 0 -68px 100px rgba(2,8,13,.52)
+}
+.hero:before{
+  background:
+    radial-gradient(circle at 68% 30%,rgba(255,193,135,.18) 0,rgba(255,157,93,.08) 9%,transparent 22%),
+    linear-gradient(90deg,rgba(3,11,18,.96) 0%,rgba(4,13,21,.78) 31%,rgba(5,14,22,.33) 61%,rgba(4,12,19,.14) 100%),
+    linear-gradient(180deg,rgba(2,7,12,.06),transparent 42%,rgba(3,10,16,.68) 100%)
+}
+.heroInner{width:100%;max-width:none;margin:0;padding:clamp(27px,2.8vh,31px) var(--page-pad-x) 24px}
+.slogan{font-size:clamp(14px,.83vw,16px);margin-bottom:clamp(48px,5vh,54px);letter-spacing:2.2px}
+.hero h1{font-size:clamp(52px,3.1vw,60px);font-weight:750;letter-spacing:-1.45px}
+.hero p{font-size:clamp(19px,1.15vw,22px);margin-top:12px}
+
+.content{
+  width:min(100%,var(--content-max));
+  max-width:var(--content-max);
+  margin:0 auto 0 0;
+  padding:clamp(22px,2.2vh,25px) var(--page-pad-x) 30px;
+}
+.categories{gap:10px;margin-bottom:clamp(30px,3.1vh,34px)}
+.catBtn{
+  height:clamp(57px,5.65vh,60px);
+  border-radius:11px;
+  font-size:clamp(15px,.83vw,16px);
+  font-weight:620;
+  background:linear-gradient(180deg,rgba(17,31,44,.97),rgba(8,19,29,.985));
+  border-color:#263e52
+}
+.catSvg{width:25px;height:25px;stroke-width:2.08;color:#b5c4d4}
+.catBtn.active{
+  background:
+    radial-gradient(circle at 50% -25%,rgba(93,206,255,.34),transparent 67%),
+    linear-gradient(180deg,#126fca 0%,#0d4d91 100%);
+  border-color:#1fa7ff;
+  box-shadow:0 0 24px rgba(23,151,255,.21),inset 0 1px rgba(255,255,255,.13)
+}
+
+.studyCard{
+  height:var(--card-h);
+  min-height:338px;
+  grid-template-columns:minmax(300px,1.05fr) minmax(305px,.92fr) minmax(235px,.72fr);
+  gap:clamp(25px,1.75vw,34px);
+  padding:clamp(30px,3.1vh,34px) clamp(52px,3.3vw,64px);
+  border-radius:16px;
+  border-color:#2e495f;
+  background:
+    radial-gradient(520px 250px at 52% 48%,rgba(25,75,106,.095),transparent 73%),
+    linear-gradient(180deg,rgba(10,23,35,.985),rgba(6,17,26,.995))
+}
+.cardNav{width:68px;height:68px;font-size:43px;border-color:#38566e;background:linear-gradient(180deg,#12283a,#0c1d2b)}
+.prev{left:-34px}.next{right:-34px}
+.sessionCount{font-size:16px;margin-bottom:15px}
+.word{font-size:clamp(53px,3.05vw,59px);font-weight:760}
+.pronunciation{font-size:21px;color:#8d9eb0;margin-top:13px}
+.pronounceBtn{width:52px;height:52px}
+.badge{margin-top:12px}
+.example{margin-top:15px;max-width:390px;padding:13px 16px;font-size:16px}
+.example .ru{font-size:13px;margin-top:6px}
+.gameVisual{max-width:305px;aspect-ratio:1.42;border-radius:12px}
+.contextIcon{width:82px;height:82px;stroke-width:1.55}
+.translation{font-size:clamp(43px,2.55vw,49px);font-weight:750}
+.translationInfo{padding-left:2px}
+.favoriteBtn{top:0;font-size:13px}
+.pos{font-size:13px;padding:7px 12px}
+
+.ratingRow{gap:14px;margin-top:16px}
+.rateBtn{height:92px;border-radius:13px}
+.rateBtn strong{font-size:18px}.rateBtn span{font-size:12px}
+.progressGrid{gap:18px;margin-top:18px}
+.progressBox{height:110px;padding:17px 19px}
+.progressHead{font-size:13px;margin-bottom:12px}.pct{font-size:19px}.bar{height:13px}
+
+/* sidebar proportions from reference */
+.brand{height:105px;padding:20px 28px}
+.logoIco{width:58px;height:58px}
+.brandName{font-size:34px;letter-spacing:-.9px}
+.brandSub{font-size:13px;letter-spacing:2.2px;margin-top:7px}
+.nav{padding:12px 10px;gap:3px}
+.navBtn{min-height:64px;padding:9px 15px;grid-template-columns:46px 1fr}
+.navBtn .ico{width:29px;height:29px;stroke-width:1.95}
+.navText strong{font-size:17px;font-weight:650}.navText span{font-size:13px;margin-top:5px}
+.quote{font-size:17px;padding:18px 19px;border-radius:13px}
+.sidebarFoot{padding-left:20px;padding-right:20px}
+
+/* Update state stays visible but does not visually compete with the reference window controls. */
+.updateWidget{width:168px;height:46px;padding:0 11px;border-radius:10px}
+.updateWidget.active{width:205px}
+.updateText{font-size:11px}
+.windowActions{gap:9px}
+.winBtn{height:48px;border-radius:10px}
+.fullBtn{font-size:17px;padding:0 17px}.squareBtn{width:52px}
+
+/* At the 1536×1024 reference size this becomes almost the original geometry. */
+@media (max-width:1600px) and (min-height:900px){
+  :root{--sidebar:33vh;--content-max:100%;--page-pad-x:36px;--hero-h:238px;--card-h:344px}
+  .content{margin:0}
+  .studyCard{grid-template-columns:minmax(285px,1.05fr) minmax(300px,.92fr) minmax(230px,.72fr);padding-left:56px;padding-right:56px}
+  .gameVisual{max-width:305px}
+}
+
+/* Wide 1080p and ultrawide screens retain reference-sized blocks instead of stretching them edge-to-edge. */
+@media (min-width:1700px) and (min-height:900px){
+  :root{--sidebar:33vh;--content-max:1240px;--page-pad-x:36px;--hero-h:238px;--card-h:352px}
+  .content{margin-left:0;margin-right:auto}
+}
+
+/* Large/4K displays scale moderately from height while keeping the same composition. */
+@media (min-width:2400px) and (min-height:1250px){
+  :root{--sidebar:380px;--content-max:1450px;--hero-h:275px;--card-h:405px;--page-pad-x:42px}
+  .hero h1{font-size:66px}.hero p{font-size:24px}
+  .catBtn{height:64px;font-size:17px}.catSvg{width:27px;height:27px}
+  .studyCard{padding:38px 70px;grid-template-columns:minmax(340px,1.05fr) minmax(355px,.92fr) minmax(275px,.72fr)}
+  .gameVisual{max-width:350px}.word{font-size:68px}.translation{font-size:55px}
+  .rateBtn{height:102px}.progressBox{height:120px}
+}
+
+/* Smaller windows: fluid fallback remains readable. */
+@media (max-width:1450px), (max-height:820px){
+  :root{--sidebar:clamp(235px,31vh,285px);--content-max:100%;--hero-h:clamp(155px,21vh,190px);--card-h:clamp(285px,37vh,320px);--page-pad-x:22px}
+  .slogan{margin-bottom:22px}.brand{height:88px}.brandSub{display:none}
+  .navBtn{min-height:49px}.navText span{font-size:10px}
+  .categories{gap:7px;margin-bottom:14px}.catBtn{height:45px;font-size:12px}.catSvg{width:20px;height:20px}
+  .studyCard{padding:21px 42px;gap:16px;grid-template-columns:minmax(220px,1fr) minmax(245px,.9fr) minmax(195px,.72fr)}
+  .gameVisual{max-width:280px}.ratingRow{margin-top:10px}.rateBtn{height:68px}.progressGrid{margin-top:10px}.progressBox{height:78px;padding:11px 14px}
+}
+</style>
 </head>
 <body>
 <svg class="hiddenSymbols" aria-hidden="true">
@@ -394,7 +535,7 @@ html,body{min-width:760px;min-height:560px}
       <button class="navBtn" data-page="stats"><svg class="ico"><use href="#i-chart"/></svg><div class="navText"><strong>Статистика</strong><span>Твой прогресс</span></div></button>
       <button class="navBtn" data-page="settings"><svg class="ico"><use href="#i-settings"/></svg><div class="navText"><strong>Настройки</strong><span>Параметры приложения</span></div></button>
     </nav>
-    <div class="sidebarFoot"><div class="quote">A new language<br>is a new world.<small>Play. Learn. Understand.</small></div><div class="versionTiny">English1000 · v1.6</div></div>
+    <div class="sidebarFoot"><div class="quote">A new language<br>is a new world.<small>Play. Learn. Understand.</small></div><div class="versionTiny">English1000 · v1.7</div></div>
   </aside>
 
   <main class="main">
@@ -512,7 +653,7 @@ var KEY='english1000_progress_v1',LOG_KEY='english1000_safe_log_v1',LOG_LIMIT=15
 function logEvent(type,details){try{var lines=JSON.parse(localStorage.getItem(LOG_KEY)||'[]');lines.push(new Date().toISOString()+' | '+type+(details?' | '+details:''));if(lines.length>LOG_LIMIT)lines=lines.slice(-LOG_LIMIT);localStorage.setItem(LOG_KEY,JSON.stringify(lines));}catch(e){}}
 window.addEventListener('error',function(e){logEvent('js_error',(e.message||'error')+' @ '+(e.filename||'')+':'+(e.lineno||0));});
 window.addEventListener('unhandledrejection',function(e){logEvent('promise_error',String(e.reason||'unknown'));});
-logEvent('app_start','English1000 v1.6 browser='+navigator.userAgent);
+logEvent('app_start','English1000 v1.7 browser='+navigator.userAgent);
 
 var state={stats:{},correct:0,wrong:0,lesson:'1',last:null,direction:'en-ru',seq:0,gameCategory:'combat',favorites:{},autoSpeak:true};
 try{var saved=localStorage.getItem(KEY);if(saved)state=Object.assign(state,JSON.parse(saved));}catch(e){}
@@ -619,7 +760,7 @@ document.getElementById('confirmReset').onclick=function(){state={stats:{},corre
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){if(modal.classList.contains('open')){closeSettings();return;}if(document.fullscreenElement){document.exitFullscreen();return;}}if(modal.classList.contains('open'))return;if(e.key==='ArrowLeft')move(-1);else if(e.key==='ArrowRight')move(1);else if(e.code==='Space'){e.preventDefault();speakCurrent();}else if(e.key==='1')rate('forgot');else if(e.key==='2')rate('hard');else if(e.key==='3')rate('normal');else if(e.key==='4')rate('easy');});
 
-var APP_VERSION='1.6';
+var APP_VERSION='1.7';
 (function enableLiveUpdates(){var retry=null;function connect(){try{var es=new EventSource('http://127.0.0.1:18473/events');es.addEventListener('update',function(ev){var d={};try{d=JSON.parse(ev.data||'{}');logEvent('live_update','to='+(d.version||'?'));}catch(e){}es.close();setTimeout(function(){try{var u=new URL(location.href);u.searchParams.set('v',d.version||APP_VERSION);u.searchParams.set('t',Date.now());location.replace(u.toString());}catch(e){location.reload();}},100);});es.onerror=function(){try{es.close();}catch(e){}clearTimeout(retry);retry=setTimeout(connect,1500);};}catch(e){clearTimeout(retry);retry=setTimeout(connect,1500);}}connect();})();
 
 makeSession();render();
