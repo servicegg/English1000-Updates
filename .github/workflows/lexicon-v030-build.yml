@@ -19,8 +19,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: '.lexicon-v030/package-lock-placeholder'
 
       - name: Reconstruct LEXICON payload
         shell: pwsh
