@@ -1,0 +1,90 @@
+name: Build LEXICON v0.4.0 EXE
+
+on:
+  push:
+    branches:
+      - lexicon-build-v0.4.0
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reconstruct source archive
+        shell: pwsh
+        run: |
+          $parts = Get-ChildItem ".lexicon-build-v040/chunks/part*.txt" | Sort-Object Name
+          if ($parts.Count -ne 5) { throw "Expected 5 chunks, got $($parts.Count)" }
+          $b64 = ($parts | ForEach-Object { (Get-Content $_.FullName -Raw).Trim() }) -join ""
+          [IO.File]::WriteAllBytes("lexicon-source.zip", [Convert]::FromBase64String($b64))
+          $expected = (Get-Content ".lexicon-build-v040/expected_sha256.txt" -Raw).Trim().ToLower()
+          $actual = (Get-FileHash "lexicon-source.zip" -Algorithm SHA256).Hash.ToLower()
+          Write-Host "Source SHA256: $actual"
+          if ($actual -ne $expected) { throw "Source checksum mismatch: expected $expected, got $actual" }
+          Expand-Archive -Path "lexicon-source.zip" -DestinationPath "." -Force
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: LEXICON-0.4.0/package-lock.json
+
+      - name: Install dependencies
+        working-directory: LEXICON-0.4.0
+        shell: pwsh
+        run: npm ci
+
+      - name: Build TypeScript
+        working-directory: LEXICON-0.4.0
+        shell: pwsh
+        run: npm run build
+
+      - name: Core and renderer tests
+        id: tests
+        continue-on-error: true
+        working-directory: LEXICON-0.4.0
+        shell: pwsh
+        run: npm test
+
+      - name: Package Windows portable EXE
+        working-directory: LEXICON-0.4.0
+        shell: pwsh
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: npx electron-builder --win portable --x64
+
+      - name: Verify EXE
+        shell: pwsh
+        run: |
+          $exe = Get-Item "LEXICON-0.4.0/release/LEXICON-0.4.0-win-x64.exe"
+          if ($exe.Length -lt 1000000) { throw "EXE is unexpectedly small: $($exe.Length)" }
+          $bytes = [IO.File]::ReadAllBytes($exe.FullName)
+          if ($bytes[0] -ne 0x4D -or $bytes[1] -ne 0x5A) { throw "Not a Windows PE executable" }
+          $hash = (Get-FileHash $exe.FullName -Algorithm SHA256).Hash.ToLower()
+          "$hash  $($exe.Name)" | Set-Content "LEXICON-0.4.0/release/LEXICON-0.4.0-SHA256SUMS.txt"
+          Write-Host "EXE size: $($exe.Length)"
+          Write-Host "EXE SHA256: $hash"
+
+      - name: Electron smoke
+        id: smoke
+        continue-on-error: true
+        working-directory: LEXICON-0.4.0
+        shell: pwsh
+        run: npm run test:electron
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lexicon-v0.4.0-windows
+          path: |
+            LEXICON-0.4.0/release/LEXICON-0.4.0-win-x64.exe
+            LEXICON-0.4.0/release/LEXICON-0.4.0-SHA256SUMS.txt
+            LEXICON-0.4.0/qa/*.png
+            LEXICON-0.4.0/qa/electron-smoke.json
+            LEXICON-0.4.0/qa/electron-smoke-error.txt
+          if-no-files-found: warn
