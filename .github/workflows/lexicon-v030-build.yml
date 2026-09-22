@@ -1,0 +1,93 @@
+name: LEXICON v0.3.0 Windows Build
+
+on:
+  push:
+    branches:
+      - lexicon-build-v0.3.0
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout build branch
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: '.lexicon-v030/package-lock-placeholder'
+
+      - name: Reconstruct LEXICON payload
+        shell: pwsh
+        run: |
+          $parts = Get-ChildItem ".lexicon-v030\part*.b64" | Sort-Object Name
+          if ($parts.Count -ne 7) { throw "Expected 7 payload parts, found $($parts.Count)" }
+          $b64 = ($parts | ForEach-Object { Get-Content $_.FullName -Raw }) -join ""
+          [IO.File]::WriteAllBytes("lexicon-v030-lean.zip", [Convert]::FromBase64String($b64))
+          $hash = (Get-FileHash "lexicon-v030-lean.zip" -Algorithm SHA256).Hash.ToLower()
+          Write-Host "Payload SHA256: $hash"
+          if ($hash -ne "3ac86a3c5d4b0483e1694c174be979160f83f2c768b340bdf57f64ddc08e7932") {
+            throw "Payload checksum mismatch"
+          }
+          Expand-Archive "lexicon-v030-lean.zip" -DestinationPath "lexicon-v030" -Force
+          Copy-Item "assets\hero_castle.webp" "lexicon-v030\assets\hero_castle.webp" -Force
+          Copy-Item "assets\combat_card.webp" "lexicon-v030\assets\combat_card.webp" -Force
+          Get-ChildItem "lexicon-v030" -Recurse | Select-Object FullName, Length
+
+      - name: Install packaging dependencies
+        working-directory: lexicon-v030
+        shell: pwsh
+        run: |
+          npm install --no-audit --no-fund
+          npx electron --version
+          npx electron-builder --version
+
+      - name: Build portable Windows EXE
+        working-directory: lexicon-v030
+        shell: pwsh
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: |
+          npx electron-builder --win portable --x64 --publish never
+          if (-not (Test-Path "release\LEXICON-0.3.0-win-x64.exe")) {
+            throw "Portable EXE was not created"
+          }
+          Get-Item "release\LEXICON-0.3.0-win-x64.exe" | Format-List Name,Length,LastWriteTime
+
+      - name: Smoke launch packaged app
+        working-directory: lexicon-v030
+        shell: pwsh
+        run: |
+          $exe = "release\win-unpacked\LEXICON.exe"
+          if (-not (Test-Path $exe)) { throw "win-unpacked executable missing" }
+          $p = Start-Process -FilePath $exe -ArgumentList "--disable-gpu" -PassThru
+          Start-Sleep -Seconds 8
+          if ($p.HasExited) {
+            throw "LEXICON exited during smoke test with code $($p.ExitCode)"
+          }
+          & taskkill /PID $p.Id /T /F
+          Write-Host "SMOKE_PASS: packaged LEXICON stayed running for 8 seconds"
+
+      - name: Generate checksums
+        working-directory: lexicon-v030
+        shell: pwsh
+        run: |
+          $exe = "release\LEXICON-0.3.0-win-x64.exe"
+          $hash = (Get-FileHash $exe -Algorithm SHA256).Hash.ToLower()
+          "$hash  LEXICON-0.3.0-win-x64.exe" | Set-Content "release\LEXICON-0.3.0-SHA256SUMS.txt" -Encoding ascii
+          Get-Content "release\LEXICON-0.3.0-SHA256SUMS.txt"
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: LEXICON-0.3.0-win-x64
+          path: |
+            lexicon-v030/release/LEXICON-0.3.0-win-x64.exe
+            lexicon-v030/release/LEXICON-0.3.0-SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 30
