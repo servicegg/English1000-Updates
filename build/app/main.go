@@ -25,8 +25,8 @@ import (
 )
 
 const (
-    coreVersion     = "1.0"
-    embeddedVersion = "1.0"
+    coreVersion     = "1.1"
+    embeddedVersion = "1.1"
     manifestURL     = "https://raw.githubusercontent.com/servicegg/English1000-Updates/main/version.json"
     remoteAppURL    = "https://raw.githubusercontent.com/servicegg/English1000-Updates/main/app.html"
     maxHTMLSize     = 2 << 20
@@ -93,28 +93,40 @@ func minimizeWindowForPID(pid int) {
     enumWindows.Call(cb, 0)
 }
 
-func findVisibleWindowForPID(pid int) uintptr {
-    if pid <= 0 { return 0 }
+func findEnglishWindow(pid int) uintptr {
     user32 := syscall.NewLazyDLL("user32.dll")
     enumWindows := user32.NewProc("EnumWindows")
     getWindowThreadProcessId := user32.NewProc("GetWindowThreadProcessId")
     isWindowVisible := user32.NewProc("IsWindowVisible")
-    var found uintptr
+    getWindowTextLength := user32.NewProc("GetWindowTextLengthW")
+    getWindowText := user32.NewProc("GetWindowTextW")
+    var byTitle uintptr
+    var byPID uintptr
     cb := syscall.NewCallback(func(hwnd uintptr, lparam uintptr) uintptr {
+        visible,_,_:=isWindowVisible.Call(hwnd)
+        if visible==0 { return 1 }
         var windowPID uint32
         getWindowThreadProcessId.Call(hwnd, uintptr(unsafe.Pointer(&windowPID)))
-        if int(windowPID)==pid {
-            visible,_,_:=isWindowVisible.Call(hwnd)
-            if visible!=0 { found=hwnd; return 0 }
+        if int(windowPID)==pid && byPID==0 { byPID=hwnd }
+        n,_,_:=getWindowTextLength.Call(hwnd)
+        if n>0 {
+            buf:=make([]uint16,int(n)+1)
+            getWindowText.Call(hwnd,uintptr(unsafe.Pointer(&buf[0])),n+1)
+            title:=strings.ToLower(syscall.UTF16ToString(buf))
+            if strings.Contains(title,"english1000") || strings.Contains(title,"english 1000") {
+                byTitle=hwnd
+                return 0
+            }
         }
         return 1
     })
     enumWindows.Call(cb,0)
-    return found
+    if byTitle!=0 { return byTitle }
+    return byPID
 }
 
 func makeWindowFramelessForPID(pid int) bool {
-    hwnd:=findVisibleWindowForPID(pid)
+    hwnd:=findEnglishWindow(pid)
     if hwnd==0 { return false }
     user32:=syscall.NewLazyDLL("user32.dll")
     getWindowLongPtr:=user32.NewProc("GetWindowLongPtrW")
@@ -136,7 +148,7 @@ func makeWindowFramelessForPID(pid int) bool {
 }
 
 func dragWindowForPID(pid int) {
-    hwnd:=findVisibleWindowForPID(pid)
+    hwnd:=findEnglishWindow(pid)
     if hwnd==0 { return }
     user32:=syscall.NewLazyDLL("user32.dll")
     releaseCapture:=user32.NewProc("ReleaseCapture")
@@ -228,7 +240,7 @@ func httpClient() *http.Client {
 
 func getBytes(client *http.Client,address string,limit int64)([]byte,error){
     req,err:=http.NewRequest(http.MethodGet,address,nil);if err!=nil{return nil,err}
-    req.Header.Set("User-Agent","English1000-SelfUpdater/1.0")
+    req.Header.Set("User-Agent","English1000-SelfUpdater/1.1")
     req.Header.Set("Cache-Control","no-cache, no-store, must-revalidate")
     req.Header.Set("Pragma","no-cache")
     resp,err:=client.Do(req);if err!=nil{return nil,err}
