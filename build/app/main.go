@@ -25,8 +25,8 @@ import (
 )
 
 const (
-    coreVersion     = "1.5"
-    embeddedVersion = "1.5"
+    coreVersion     = "1.6"
+    embeddedVersion = "1.6"
     manifestURL     = "https://raw.githubusercontent.com/servicegg/English1000-Updates/main/version.json"
     remoteAppURL    = "https://raw.githubusercontent.com/servicegg/English1000-Updates/main/app.html"
     maxHTMLSize     = 2 << 20
@@ -309,7 +309,7 @@ func httpClient() *http.Client {
 
 func getBytesProgress(client *http.Client,address string,limit int64,cb func(int))([]byte,error){
     req,err:=http.NewRequest(http.MethodGet,address,nil);if err!=nil{return nil,err}
-    req.Header.Set("User-Agent","English1000-SelfUpdater/1.5")
+    req.Header.Set("User-Agent","English1000-SelfUpdater/1.6")
     req.Header.Set("Cache-Control","no-cache, no-store, must-revalidate")
     req.Header.Set("Pragma","no-cache")
     resp,err:=client.Do(req);if err!=nil{return nil,err}
@@ -547,7 +547,6 @@ func main(){
     for{
         select{
         case <-ticker.C:
-            monitor.set("checking","Проверяю обновления…",installed,"",0,false)
             m,err:=fetchManifest(client);if err!=nil{monitor.set("offline","Не удалось проверить",installed,"",0,false);continue}
             if versionParts(m.EXEVersion)!=nil && compareVersions(m.EXEVersion,coreVersion)>0{
                 staged,e:=stageCoreUpdate(client,appDir,m,monitor,installed)
