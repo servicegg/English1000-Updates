@@ -381,8 +381,7 @@ func ensureUpdater(appDir string)(string,error){
     sum:=sha256.Sum256(b);expected:=hex.EncodeToString(sum[:])
     current,err:=os.ReadFile(path)
     if err==nil { s:=sha256.Sum256(current); if strings.EqualFold(hex.EncodeToString(s[:]),expected){return path,nil} }
-    monitor.set("installing","Подготовка установки",current,m.EXEVersion,100,true)
-    if err:=atomicWrite(path,b);err!=nil{monitor.set("error","Ошибка подготовки обновления",current,m.EXEVersion,100,true);return "",err}
+    if err:=atomicWrite(path,b);err!=nil{return "",err}
     return path,nil
 }
 
@@ -399,7 +398,8 @@ func stageCoreUpdate(client *http.Client,appDir string,m manifest,monitor *updat
     if !strings.EqualFold(got,strings.TrimSpace(m.EXESHA256)){monitor.set("error","Проверка обновления не пройдена",current,m.EXEVersion,0,true);return "",fmt.Errorf("sha256 mismatch")}
     dir:=filepath.Join(appDir,"Updates");if err:=os.MkdirAll(dir,0755);err!=nil{return "",err}
     path:=filepath.Join(dir,"English1000_"+strings.ReplaceAll(m.EXEVersion,".","_")+".exe")
-    if err:=atomicWrite(path,b);err!=nil{return "",err}
+    monitor.set("installing","Подготовка установки",current,m.EXEVersion,100,true)
+    if err:=atomicWrite(path,b);err!=nil{monitor.set("error","Ошибка подготовки обновления",current,m.EXEVersion,100,true);return "",err}
     return path,nil
 }
 
