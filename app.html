@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>English1000 v1.3</title>
+<title>English1000 v1.4</title>
 <style>
 :root{--bg:#061019;--panel:#0b1722;--line:#27445d;--text:#f5f8fc;--muted:#9badbf;--blue:#22a6ff;--cyan:#53d8ff;--green:#43df88;--orange:#ff9a4a;--red:#ff667c;--sidebar:clamp(330px,22vw,420px)}
 *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#050b11;color:var(--text);font-family:"Segoe UI Variable","Segoe UI",Arial,sans-serif}button,select,input{font:inherit}
@@ -125,6 +125,203 @@ html,body{background:#040a0f}
 .bar.green>div{box-shadow:0 0 15px rgba(63,219,129,.24)}
 @media(max-width:1280px){.hero{background-size:auto 175%!important;background-position:right 26%!important}}
 </style>
+
+<style id="v14-responsive">
+/* v1.4 — fluid layout. Baseline: 1920×1080, adapts to smaller/larger and ultrawide screens. */
+:root{
+  --sidebar:clamp(260px,18.75vw,360px);
+  --page-pad-x:clamp(18px,1.8vw,36px);
+  --page-pad-y:clamp(14px,1.9vh,22px);
+  --hero-h:clamp(185px,23vh,250px);
+  --ui-gap:clamp(10px,1vw,16px);
+  --card-h:clamp(320px,34vh,390px);
+  --content-max:1760px;
+}
+html,body{min-width:760px;min-height:560px}
+.appShell{grid-template-columns:var(--sidebar) minmax(0,1fr)}
+.main{overflow:auto;overflow-x:hidden}
+.hero{height:var(--hero-h)}
+.heroInner{
+  width:min(100%,var(--content-max));
+  margin:0 auto;
+  padding:
+    clamp(20px,2.4vh,30px)
+    var(--page-pad-x)
+    clamp(18px,2.2vh,26px);
+}
+.slogan{
+  font-size:clamp(12px,.83vw,16px);
+  margin-bottom:clamp(26px,4.8vh,48px);
+}
+.hero h1{font-size:clamp(40px,3.2vw,62px)}
+.hero p{font-size:clamp(15px,1.18vw,23px)}
+.windowActions{gap:clamp(7px,.55vw,10px)}
+.winBtn{height:clamp(42px,4.65vh,50px)}
+.fullBtn{font-size:clamp(14px,.94vw,18px);padding-inline:clamp(12px,1vw,18px)}
+.squareBtn{width:clamp(46px,2.8vw,54px);font-size:clamp(23px,1.45vw,28px)}
+
+.content{
+  width:min(100%,var(--content-max));
+  margin:0 auto;
+  padding:var(--page-pad-y) var(--page-pad-x) clamp(22px,3vh,34px);
+}
+.categories{
+  gap:clamp(8px,.55vw,11px);
+  margin-bottom:clamp(16px,2.2vh,24px);
+}
+.catBtn{
+  height:clamp(50px,5.55vh,60px);
+  min-width:0;
+  gap:clamp(7px,.48vw,10px);
+  padding-inline:clamp(8px,.75vw,14px);
+  font-size:clamp(13px,.83vw,16px);
+}
+.catSvg{width:clamp(19px,1.25vw,24px);height:clamp(19px,1.25vw,24px)}
+
+.studyCard{
+  height:var(--card-h);
+  min-height:300px;
+  grid-template-columns:
+    minmax(250px,1.05fr)
+    minmax(270px,.92fr)
+    minmax(230px,.76fr);
+  gap:clamp(18px,1.75vw,34px);
+  padding:
+    clamp(24px,3.35vh,36px)
+    clamp(42px,3.35vw,64px);
+}
+.cardNav{
+  width:clamp(54px,3.55vw,68px);
+  height:clamp(54px,3.55vw,68px);
+  font-size:clamp(35px,2.3vw,44px);
+}
+.prev{left:calc(clamp(54px,3.55vw,68px)/-2)}
+.next{right:calc(clamp(54px,3.55vw,68px)/-2)}
+.sessionCount{font-size:clamp(13px,.88vw,17px)}
+.word{font-size:clamp(44px,3.45vw,66px)}
+.pronounceBtn{
+  width:clamp(44px,2.8vw,54px);
+  height:clamp(44px,2.8vw,54px);
+  font-size:clamp(19px,1.2vw,23px)
+}
+.pronunciation{font-size:clamp(16px,1.15vw,22px)}
+.badge{font-size:clamp(12px,.73vw,14px);padding:clamp(5px,.65vh,7px) clamp(9px,.65vw,12px)}
+.badgeSvg{width:clamp(14px,.83vw,16px);height:clamp(14px,.83vw,16px)}
+.example{
+  margin-top:clamp(12px,1.65vh,18px);
+  padding:clamp(11px,1.4vh,15px) clamp(12px,.9vw,17px);
+  font-size:clamp(14px,.94vw,18px)
+}
+.example .ru{font-size:clamp(11px,.73vw,14px)}
+.gameVisual{max-width:min(390px,100%);max-height:100%}
+.contextIcon{width:clamp(66px,4.7vw,90px);height:clamp(66px,4.7vw,90px)}
+.translation{font-size:clamp(38px,2.82vw,54px)}
+.pos{font-size:clamp(11px,.73vw,14px);padding:clamp(5px,.72vh,8px) clamp(9px,.7vw,13px)}
+.favoriteBtn{font-size:clamp(11px,.73vw,14px)}
+.favoriteBtn .star{font-size:clamp(21px,1.4vw,27px)}
+
+.ratingRow{gap:clamp(10px,.73vw,14px);margin-top:clamp(12px,1.5vh,16px)}
+.rateBtn{height:clamp(76px,8.9vh,96px)}
+.rateBtn strong{font-size:clamp(15px,1.05vw,20px)}
+.rateBtn span{font-size:clamp(10px,.68vw,13px)}
+
+.progressGrid{gap:clamp(12px,.94vw,18px);margin-top:clamp(13px,1.7vh,18px)}
+.progressBox{
+  height:clamp(92px,10.35vh,112px);
+  padding:clamp(14px,1.65vh,18px) clamp(15px,1.05vw,20px)
+}
+.progressHead{font-size:clamp(11px,.73vw,14px);margin-bottom:clamp(8px,1.2vh,13px)}
+.bar{height:clamp(10px,1.2vh,13px)}
+.pct{font-size:clamp(16px,1.05vw,20px)}
+
+.brand{
+  height:clamp(92px,10.4vh,112px);
+  padding:clamp(17px,2vh,22px) clamp(18px,1.45vw,28px)
+}
+.logoIco{width:clamp(46px,3.2vw,62px);height:clamp(46px,3.2vw,62px)}
+.brandName{font-size:clamp(25px,1.88vw,36px)}
+.brandSub{font-size:clamp(10px,.73vw,14px)}
+.nav{padding:clamp(9px,1.2vh,13px) 10px}
+.navBtn{
+  min-height:clamp(54px,6.2vh,67px);
+  grid-template-columns:clamp(37px,2.5vw,48px) 1fr;
+  padding:clamp(7px,.95vh,10px) clamp(11px,.78vw,15px)
+}
+.navBtn .ico{width:clamp(23px,1.55vw,30px);height:clamp(23px,1.55vw,30px)}
+.navText strong{font-size:clamp(14px,.94vw,18px)}
+.navText span{font-size:clamp(11px,.73vw,14px);margin-top:clamp(3px,.55vh,6px)}
+.sidebarFoot{padding:clamp(8px,1.1vh,12px) clamp(15px,1.15vw,22px) clamp(14px,1.85vh,20px)}
+.quote{padding:clamp(14px,1.85vh,20px);font-size:clamp(14px,.94vw,18px)}
+.quote small{font-size:clamp(9px,.58vw,11px)}
+
+/* 16:9 desktop baseline */
+@media (min-width:1600px) and (max-aspect-ratio:1.9/1){
+  :root{--sidebar:clamp(330px,18.75vw,360px);--card-h:clamp(350px,35vh,390px)}
+}
+
+/* Ultrawide: don't stretch cards endlessly; keep a composed central canvas. */
+@media (min-aspect-ratio:1.9/1) and (min-width:1500px){
+  :root{--content-max:1840px;--sidebar:clamp(300px,16vw,350px);--hero-h:clamp(190px,21vh,245px)}
+  .content,.heroInner{padding-left:clamp(28px,2.4vw,48px);padding-right:clamp(28px,2.4vw,48px)}
+  .studyCard{grid-template-columns:minmax(300px,1fr) minmax(340px,.92fr) minmax(280px,.82fr)}
+}
+
+/* 4K / very large desktop: scale up modestly, not 2×. */
+@media (min-width:2400px) and (min-height:1250px){
+  :root{--content-max:2050px;--sidebar:380px;--hero-h:285px;--card-h:430px;--page-pad-x:42px}
+  .brandName{font-size:39px}
+  .hero h1{font-size:68px}
+  .hero p{font-size:25px}
+  .catBtn{height:66px;font-size:18px}
+  .studyCard{padding:40px 72px;gap:38px}
+  .word{font-size:72px}
+  .translation{font-size:58px}
+  .gameVisual{max-width:430px}
+  .rateBtn{height:104px}
+  .progressBox{height:120px}
+}
+
+/* Medium desktop / 1366×768-ish. */
+@media (max-width:1450px), (max-height:820px){
+  :root{--sidebar:clamp(240px,18vw,285px);--hero-h:clamp(160px,21vh,190px);--card-h:clamp(285px,37vh,320px);--page-pad-x:22px;--page-pad-y:12px}
+  .brand{height:88px}.brandSub{display:none}
+  .navBtn{min-height:49px}.navText span{font-size:10px}
+  .sidebarFoot{padding-bottom:10px}.quote{font-size:13px;padding:12px}.quote small{display:none}.versionTiny{margin-top:6px}
+  .slogan{margin-bottom:22px}
+  .categories{gap:7px;margin-bottom:13px}
+  .catBtn{height:45px;font-size:12px}
+  .studyCard{padding:21px 42px;gap:16px;grid-template-columns:minmax(220px,1fr) minmax(245px,.9fr) minmax(195px,.72fr)}
+  .example{margin-top:10px}
+  .ratingRow{margin-top:10px}.rateBtn{height:68px}.rateBtn span{font-size:9px}
+  .progressGrid{margin-top:10px}.progressBox{height:78px;padding:11px 14px}.progressHead{margin-bottom:7px}
+}
+
+/* Narrow window: simplify sidebar and restructure the card rather than shrinking text to illegibility. */
+@media (max-width:1100px){
+  :root{--sidebar:86px;--page-pad-x:18px;--hero-h:165px;--card-h:auto}
+  .brand{padding:14px 10px;justify-content:center}.brandWords,.navText,.sidebarFoot{display:none}
+  .navBtn{grid-template-columns:1fr;justify-items:center;padding:8px;min-height:54px}
+  .navBtn .ico{width:28px;height:28px}
+  .heroInner{padding-left:22px;padding-right:22px}
+  .hero p{max-width:620px}
+  .fullBtn span{display:none}.fullBtn{width:48px;padding:0}
+  .categories{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .studyCard{height:auto;min-height:0;grid-template-columns:1fr 1fr;padding:28px 44px}
+  .translationInfo{grid-column:1/-1;display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px}
+  .translation{margin-top:0}.pos{grid-column:1}.favoriteBtn{position:static;justify-self:end}
+  .ratingRow{grid-template-columns:1fr 1fr}
+  .progressGrid{grid-template-columns:1fr}
+}
+
+/* Very short windows: preserve access via scrolling instead of clipping. */
+@media (max-height:650px){
+  html,body{overflow:auto}
+  .main{overflow:auto}
+  :root{--hero-h:145px}
+  .hero h1{font-size:38px}.hero p{font-size:14px}.slogan{margin-bottom:14px}
+  .quote{display:none}
+}
+</style>
 </head>
 <body>
 <svg class="hiddenSymbols" aria-hidden="true">
@@ -162,7 +359,7 @@ html,body{background:#040a0f}
       <button class="navBtn" data-page="stats"><svg class="ico"><use href="#i-chart"/></svg><div class="navText"><strong>Статистика</strong><span>Твой прогресс</span></div></button>
       <button class="navBtn" data-page="settings"><svg class="ico"><use href="#i-settings"/></svg><div class="navText"><strong>Настройки</strong><span>Параметры приложения</span></div></button>
     </nav>
-    <div class="sidebarFoot"><div class="quote">A new language<br>is a new world.<small>Play. Learn. Understand.</small></div><div class="versionTiny">English1000 · v1.3</div></div>
+    <div class="sidebarFoot"><div class="quote">A new language<br>is a new world.<small>Play. Learn. Understand.</small></div><div class="versionTiny">English1000 · v1.4</div></div>
   </aside>
 
   <main class="main">
@@ -274,7 +471,7 @@ var KEY='english1000_progress_v1',LOG_KEY='english1000_safe_log_v1',LOG_LIMIT=15
 function logEvent(type,details){try{var lines=JSON.parse(localStorage.getItem(LOG_KEY)||'[]');lines.push(new Date().toISOString()+' | '+type+(details?' | '+details:''));if(lines.length>LOG_LIMIT)lines=lines.slice(-LOG_LIMIT);localStorage.setItem(LOG_KEY,JSON.stringify(lines));}catch(e){}}
 window.addEventListener('error',function(e){logEvent('js_error',(e.message||'error')+' @ '+(e.filename||'')+':'+(e.lineno||0));});
 window.addEventListener('unhandledrejection',function(e){logEvent('promise_error',String(e.reason||'unknown'));});
-logEvent('app_start','English1000 v1.3 browser='+navigator.userAgent);
+logEvent('app_start','English1000 v1.4 browser='+navigator.userAgent);
 
 var state={stats:{},correct:0,wrong:0,lesson:'1',last:null,direction:'en-ru',seq:0,gameCategory:'combat',favorites:{},autoSpeak:true};
 try{var saved=localStorage.getItem(KEY);if(saved)state=Object.assign(state,JSON.parse(saved));}catch(e){}
@@ -343,7 +540,7 @@ document.getElementById('confirmReset').onclick=function(){state={stats:{},corre
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){if(modal.classList.contains('open')){closeSettings();return;}if(document.fullscreenElement){document.exitFullscreen();return;}}if(modal.classList.contains('open'))return;if(e.key==='ArrowLeft')move(-1);else if(e.key==='ArrowRight')move(1);else if(e.code==='Space'){e.preventDefault();speakCurrent();}else if(e.key==='1')rate('forgot');else if(e.key==='2')rate('hard');else if(e.key==='3')rate('normal');else if(e.key==='4')rate('easy');});
 
-var APP_VERSION='1.3';
+var APP_VERSION='1.4';
 (function enableLiveUpdates(){var retry=null;function connect(){try{var es=new EventSource('http://127.0.0.1:18473/events');es.addEventListener('update',function(ev){var d={};try{d=JSON.parse(ev.data||'{}');logEvent('live_update','to='+(d.version||'?'));}catch(e){}es.close();setTimeout(function(){try{var u=new URL(location.href);u.searchParams.set('v',d.version||APP_VERSION);u.searchParams.set('t',Date.now());location.replace(u.toString());}catch(e){location.reload();}},100);});es.onerror=function(){try{es.close();}catch(e){}clearTimeout(retry);retry=setTimeout(connect,1500);};}catch(e){clearTimeout(retry);retry=setTimeout(connect,1500);}}connect();})();
 
 makeSession();render();
