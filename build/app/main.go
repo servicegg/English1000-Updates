@@ -25,8 +25,8 @@ import (
 )
 
 const (
-    coreVersion     = "1.1"
-    embeddedVersion = "1.1"
+    coreVersion     = "1.5"
+    embeddedVersion = "1.5"
     manifestURL     = "https://raw.githubusercontent.com/servicegg/English1000-Updates/main/version.json"
     remoteAppURL    = "https://raw.githubusercontent.com/servicegg/English1000-Updates/main/app.html"
     maxHTMLSize     = 2 << 20
@@ -61,6 +61,75 @@ func (h *eventHub) broadcast(version string) {
     for ch := range h.subs {
         select { case ch <- payload: default: }
     }
+}
+
+type updateStatus struct {
+    State          string `json:"state"`
+    Message        string `json:"message"`
+    Progress       int    `json:"progress"`
+    CurrentVersion string `json:"current_version"`
+    LatestVersion  string `json:"latest_version"`
+    HasUpdate      bool   `json:"has_update"`
+    LastChecked    string `json:"last_checked"`
+}
+
+type updateMonitor struct {
+    mu sync.RWMutex
+    s  updateStatus
+}
+
+func newUpdateMonitor(current string) *updateMonitor {
+    return &updateMonitor{s:updateStatus{
+        State:"checking", Message:"Проверяю обновления…", Progress:0,
+        CurrentVersion:current, LastChecked:time.Now().Format(time.RFC3339),
+    }}
+}
+
+func (m *updateMonitor) set(state,message,current,latest string,progress int,hasUpdate bool) {
+    if m==nil { return }
+    m.mu.Lock()
+    defer m.mu.Unlock()
+    if current!="" { m.s.CurrentVersion=current }
+    if latest!="" { m.s.LatestVersion=latest }
+    m.s.State=state
+    m.s.Message=message
+    m.s.Progress=progress
+    m.s.HasUpdate=hasUpdate
+    m.s.LastChecked=time.Now().Format(time.RFC3339)
+}
+
+func (m *updateMonitor) snapshot() updateStatus {
+    if m==nil { return updateStatus{State:"offline",Message:"Статус обновлений недоступен"} }
+    m.mu.RLock()
+    defer m.mu.RUnlock()
+    return m.s
+}
+
+type progressReader struct {
+    r io.Reader
+    total int64
+    size int64
+    last int
+    cb func(int)
+}
+
+func (p *progressReader) Read(buf []byte)(int,error){
+    n,err:=p.r.Read(buf)
+    if n>0 {
+        p.total+=int64(n)
+        if p.cb!=nil {
+            pct:=-1
+            if p.size>0 {
+                pct=int((p.total*100)/p.size)
+                if pct>100 { pct=100 }
+            }
+            if pct!=p.last {
+                p.last=pct
+                p.cb(pct)
+            }
+        }
+    }
+    return n,err
 }
 
 func messageBox(title, body string) {
@@ -238,18 +307,25 @@ func httpClient() *http.Client {
     return &http.Client{Timeout:8*time.Second,Transport:tr}
 }
 
-func getBytes(client *http.Client,address string,limit int64)([]byte,error){
+func getBytesProgress(client *http.Client,address string,limit int64,cb func(int))([]byte,error){
     req,err:=http.NewRequest(http.MethodGet,address,nil);if err!=nil{return nil,err}
-    req.Header.Set("User-Agent","English1000-SelfUpdater/1.1")
+    req.Header.Set("User-Agent","English1000-SelfUpdater/1.5")
     req.Header.Set("Cache-Control","no-cache, no-store, must-revalidate")
     req.Header.Set("Pragma","no-cache")
     resp,err:=client.Do(req);if err!=nil{return nil,err}
     defer resp.Body.Close()
     if resp.StatusCode!=http.StatusOK{return nil,fmt.Errorf("HTTP %d",resp.StatusCode)}
-    r:=io.LimitReader(resp.Body,limit+1)
-    b,err:=io.ReadAll(r);if err!=nil{return nil,err}
+    if cb!=nil { cb(0) }
+    limited:=io.LimitReader(resp.Body,limit+1)
+    pr:=&progressReader{r:limited,size:resp.ContentLength,last:-2,cb:cb}
+    b,err:=io.ReadAll(pr);if err!=nil{return nil,err}
     if int64(len(b))>limit{return nil,fmt.Errorf("file too large")}
+    if cb!=nil { cb(100) }
     return b,nil
+}
+
+func getBytes(client *http.Client,address string,limit int64)([]byte,error){
+    return getBytesProgress(client,address,limit,nil)
 }
 
 func fetchManifest(client *http.Client)(manifest,error){
@@ -266,7 +342,7 @@ func localFileSHA256(path string) string {
     return hex.EncodeToString(sum[:])
 }
 
-func updateHTML(client *http.Client,appDir,htmlPath,versionPath,installed string,m manifest)(string,bool){
+func updateHTML(client *http.Client,appDir,htmlPath,versionPath,installed string,m manifest,monitor *updateMonitor)(string,bool){
     if versionParts(m.Version)==nil{return installed,false}
     expected:=strings.ToLower(strings.TrimSpace(m.SHA256))
     if len(expected)!=64{logLine(appDir,"html update rejected: invalid sha256");return installed,false}
@@ -279,16 +355,22 @@ func updateHTML(client *http.Client,appDir,htmlPath,versionPath,installed string
     reason:="new version"
     if versionCmp<=0 && localHash!=expected { reason="hash repair" }
     logLine(appDir,"html refresh required: "+reason+" local="+localHash+" expected="+expected)
+    monitor.set("available","Есть обновление",installed,m.Version,0,true)
 
     stamp:=strconv.FormatInt(time.Now().UnixNano(),10)
-    html,err:=getBytes(client,remoteAppURL+"?v="+url.QueryEscape(m.Version)+"&t="+stamp,maxHTMLSize)
-    if err!=nil{logLine(appDir,"html update download failed: "+err.Error());return installed,false}
+    monitor.set("downloading","Скачивание интерфейса",installed,m.Version,0,true)
+    html,err:=getBytesProgress(client,remoteAppURL+"?v="+url.QueryEscape(m.Version)+"&t="+stamp,maxHTMLSize,func(p int){
+        monitor.set("downloading","Скачивание интерфейса",installed,m.Version,p,true)
+    })
+    if err!=nil{logLine(appDir,"html update download failed: "+err.Error());monitor.set("error","Ошибка загрузки обновления",installed,m.Version,0,true);return installed,false}
     sum:=sha256.Sum256(html);got:=hex.EncodeToString(sum[:])
-    if !strings.EqualFold(got,expected){logLine(appDir,"html update rejected: sha256 mismatch");return installed,false}
-    if err:=atomicWrite(htmlPath,html);err!=nil{logLine(appDir,"html update install failed: "+err.Error());return installed,false}
+    if !strings.EqualFold(got,expected){logLine(appDir,"html update rejected: sha256 mismatch");monitor.set("error","Проверка обновления не пройдена",installed,m.Version,0,true);return installed,false}
+    monitor.set("installing","Установка интерфейса",installed,m.Version,100,true)
+    if err:=atomicWrite(htmlPath,html);err!=nil{logLine(appDir,"html update install failed: "+err.Error());monitor.set("error","Ошибка установки обновления",installed,m.Version,100,true);return installed,false}
     installed=strings.TrimSpace(m.Version)
     _=os.WriteFile(versionPath,[]byte(installed),0644)
     logLine(appDir,"updated/repaired HTML to v"+installed)
+    monitor.set("up_to_date","Обновлений нет",installed,m.Version,100,false)
     return installed,true
 }
 
@@ -299,17 +381,22 @@ func ensureUpdater(appDir string)(string,error){
     sum:=sha256.Sum256(b);expected:=hex.EncodeToString(sum[:])
     current,err:=os.ReadFile(path)
     if err==nil { s:=sha256.Sum256(current); if strings.EqualFold(hex.EncodeToString(s[:]),expected){return path,nil} }
-    if err:=atomicWrite(path,b);err!=nil{return "",err}
+    monitor.set("installing","Подготовка установки",current,m.EXEVersion,100,true)
+    if err:=atomicWrite(path,b);err!=nil{monitor.set("error","Ошибка подготовки обновления",current,m.EXEVersion,100,true);return "",err}
     return path,nil
 }
 
-func stageCoreUpdate(client *http.Client,appDir string,m manifest)(string,error){
+func stageCoreUpdate(client *http.Client,appDir string,m manifest,monitor *updateMonitor,current string)(string,error){
     if m.EXEURL=="" || len(strings.TrimSpace(m.EXESHA256))!=64{return "",fmt.Errorf("invalid exe manifest")}
     stamp:=strconv.FormatInt(time.Now().UnixNano(),10)
     sep:="?";if strings.Contains(m.EXEURL,"?"){sep="&"}
-    b,err:=getBytes(client,m.EXEURL+sep+"v="+url.QueryEscape(m.EXEVersion)+"&t="+stamp,maxEXESize);if err!=nil{return "",err}
+    monitor.set("available","Есть обновление",current,m.EXEVersion,0,true)
+    monitor.set("downloading","Скачивание приложения",current,m.EXEVersion,0,true)
+    b,err:=getBytesProgress(client,m.EXEURL+sep+"v="+url.QueryEscape(m.EXEVersion)+"&t="+stamp,maxEXESize,func(p int){
+        monitor.set("downloading","Скачивание приложения",current,m.EXEVersion,p,true)
+    });if err!=nil{monitor.set("error","Ошибка загрузки обновления",current,m.EXEVersion,0,true);return "",err}
     sum:=sha256.Sum256(b);got:=hex.EncodeToString(sum[:])
-    if !strings.EqualFold(got,strings.TrimSpace(m.EXESHA256)){return "",fmt.Errorf("sha256 mismatch")}
+    if !strings.EqualFold(got,strings.TrimSpace(m.EXESHA256)){monitor.set("error","Проверка обновления не пройдена",current,m.EXEVersion,0,true);return "",fmt.Errorf("sha256 mismatch")}
     dir:=filepath.Join(appDir,"Updates");if err:=os.MkdirAll(dir,0755);err!=nil{return "",err}
     path:=filepath.Join(dir,"English1000_"+strings.ReplaceAll(m.EXEVersion,".","_")+".exe")
     if err:=atomicWrite(path,b);err!=nil{return "",err}
@@ -333,7 +420,7 @@ func launchCoreUpdater(appDir string,m manifest,staged string) error {
     return cmd.Start()
 }
 
-func startControlServer(hub *eventHub,closeCh chan struct{},minimizeCh chan struct{},dragCh chan struct{})(*http.Server,error){
+func startControlServer(hub *eventHub,monitor *updateMonitor,closeCh chan struct{},minimizeCh chan struct{},dragCh chan struct{})(*http.Server,error){
     mux:=http.NewServeMux()
     mux.HandleFunc("/events",func(w http.ResponseWriter,r *http.Request){
         w.Header().Set("Access-Control-Allow-Origin","*")
@@ -355,6 +442,15 @@ func startControlServer(hub *eventHub,closeCh chan struct{},minimizeCh chan stru
                 return
             }
         }
+    })
+    mux.HandleFunc("/status",func(w http.ResponseWriter,r *http.Request){
+        w.Header().Set("Access-Control-Allow-Origin","*")
+        w.Header().Set("Access-Control-Allow-Private-Network","true")
+        w.Header().Set("Access-Control-Allow-Methods","GET, OPTIONS")
+        w.Header().Set("Cache-Control","no-store")
+        if r.Method==http.MethodOptions { w.WriteHeader(http.StatusNoContent); return }
+        w.Header().Set("Content-Type","application/json; charset=utf-8")
+        _=json.NewEncoder(w).Encode(monitor.snapshot())
     })
     mux.HandleFunc("/close",func(w http.ResponseWriter,r *http.Request){
         w.Header().Set("Access-Control-Allow-Origin","*")
@@ -389,22 +485,31 @@ func main(){
     versionPath:=filepath.Join(appDir,"app.version")
     installed:=ensureEmbeddedBaseline(appDir,htmlPath,versionPath)
     client:=httpClient()
+    monitor:=newUpdateMonitor(installed)
 
     if m,err:=fetchManifest(client);err==nil{
+        monitor.set("checking","Проверяю обновления…",installed,m.Version,0,false)
         if versionParts(m.EXEVersion)!=nil && compareVersions(m.EXEVersion,coreVersion)>0{
-            staged,e:=stageCoreUpdate(client,appDir,m)
+            staged,e:=stageCoreUpdate(client,appDir,m,monitor,installed)
             if e==nil{e=launchCoreUpdater(appDir,m,staged)}
             if e==nil{logLine(appDir,"staged core v"+m.EXEVersion+"; restarting");return}
             logLine(appDir,"core update failed: "+e.Error())
         }
-        installed,_=updateHTML(client,appDir,htmlPath,versionPath,installed,m)
+        var changed bool
+        installed,changed=updateHTML(client,appDir,htmlPath,versionPath,installed,m,monitor)
+        _=changed
+        if compareVersions(m.Version,installed)<=0 && compareVersions(m.EXEVersion,coreVersion)<=0 {
+            monitor.set("up_to_date","Обновлений нет",installed,m.Version,100,false)
+        }
+    } else {
+        monitor.set("offline","Не удалось проверить",installed,"",0,false)
     }
 
     closeCh:=make(chan struct{},2)
     minimizeCh:=make(chan struct{},2)
     dragCh:=make(chan struct{},2)
     hub:=newEventHub()
-    srv,err:=startControlServer(hub,closeCh,minimizeCh,dragCh)
+    srv,err:=startControlServer(hub,monitor,closeCh,minimizeCh,dragCh)
     if err!=nil{messageBox("English 1000","Не удалось запустить модуль мгновенных обновлений. Закрой другие копии English 1000 и попробуй снова.");return}
     defer func(){
         ctx,cancel:=context.WithTimeout(context.Background(),500*time.Millisecond)
@@ -442,11 +547,13 @@ func main(){
     for{
         select{
         case <-ticker.C:
-            m,err:=fetchManifest(client);if err!=nil{continue}
+            monitor.set("checking","Проверяю обновления…",installed,"",0,false)
+            m,err:=fetchManifest(client);if err!=nil{monitor.set("offline","Не удалось проверить",installed,"",0,false);continue}
             if versionParts(m.EXEVersion)!=nil && compareVersions(m.EXEVersion,coreVersion)>0{
-                staged,e:=stageCoreUpdate(client,appDir,m)
+                staged,e:=stageCoreUpdate(client,appDir,m,monitor,installed)
                 if e==nil{e=launchCoreUpdater(appDir,m,staged)}
                 if e==nil{
+                    monitor.set("installing","Установка приложения",installed,m.EXEVersion,100,true)
                     logLine(appDir,"live core update to v"+m.EXEVersion+" triggered")
                     _=cmd.Process.Kill()
                     time.Sleep(120*time.Millisecond)
@@ -454,9 +561,12 @@ func main(){
                 }
                 logLine(appDir,"live core update failed: "+e.Error())
             }
-            next,changed:=updateHTML(client,appDir,htmlPath,versionPath,installed,m)
+            next,changed:=updateHTML(client,appDir,htmlPath,versionPath,installed,m,monitor)
             installed=next
             if changed{hub.broadcast(installed)}
+            if !changed && compareVersions(m.Version,installed)<=0 && compareVersions(m.EXEVersion,coreVersion)<=0 {
+                monitor.set("up_to_date","Обновлений нет",installed,m.Version,100,false)
+            }
         case <-minimizeCh:
             minimizeWindowForPID(cmd.Process.Pid)
         case <-dragCh:
