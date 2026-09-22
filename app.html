@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>English1000 v1.4</title>
+<title>English1000 v1.5</title>
 <style>
 :root{--bg:#061019;--panel:#0b1722;--line:#27445d;--text:#f5f8fc;--muted:#9badbf;--blue:#22a6ff;--cyan:#53d8ff;--green:#43df88;--orange:#ff9a4a;--red:#ff667c;--sidebar:clamp(330px,22vw,420px)}
 *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#050b11;color:var(--text);font-family:"Segoe UI Variable","Segoe UI",Arial,sans-serif}button,select,input{font:inherit}
@@ -322,6 +322,41 @@ html,body{min-width:760px;min-height:560px}
   .quote{display:none}
 }
 </style>
+
+<style id="v15-update-ui">
+.updateWidget{
+  width:clamp(158px,10.4vw,200px);height:50px;padding:0 12px;
+  border:1px solid #294256;border-radius:11px;
+  background:rgba(5,14,23,.84);box-shadow:0 10px 28px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.02);
+  display:flex;flex-direction:column;justify-content:center;gap:6px;
+  color:#aebdcb;pointer-events:none;transition:.18s ease;
+}
+.updateTop{display:flex;align-items:center;gap:7px;min-width:0;line-height:1}
+.updateMark{width:18px;height:18px;flex:none;display:grid;place-items:center;border-radius:50%;font-size:13px;font-weight:900}
+.updateText{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:650}
+.updatePercent{margin-left:auto;font-size:11px;font-variant-numeric:tabular-nums;color:#91a8bc}
+.updateTrack{height:4px;border-radius:999px;background:#102333;overflow:hidden;display:none;box-shadow:inset 0 1px 3px rgba(0,0,0,.45)}
+.updateFill{height:100%;width:0%;border-radius:inherit;background:linear-gradient(90deg,#35caff,#238dff);box-shadow:0 0 10px rgba(45,174,255,.35);transition:width .18s ease}
+.updateWidget.ok{border-color:rgba(55,142,96,.52);background:rgba(7,28,21,.76)}
+.updateWidget.ok .updateMark{color:#71e5a1;background:rgba(51,190,108,.10)}
+.updateWidget.ok .updateText{color:#bfe8cf}
+.updateWidget.checking .updateMark{color:#80bfdc;animation:updateSpin 1.15s linear infinite}
+.updateWidget.available{border-color:#2a78ad;background:rgba(7,30,46,.82)}
+.updateWidget.available .updateMark{color:#56cbff}.updateWidget.available .updateText{color:#c8eaff}
+.updateWidget.active{width:clamp(190px,12vw,230px);border-color:#2b79b1;background:rgba(6,27,43,.88)}
+.updateWidget.active .updateTrack{display:block}.updateWidget.active .updateMark{color:#5fd5ff}.updateWidget.active .updateText{color:#d7f2ff}
+.updateWidget.installing .updateFill{width:100%!important;background:linear-gradient(90deg,#34c8ff,#42df9a);animation:updatePulse .9s ease-in-out infinite alternate}
+.updateWidget.error{border-color:rgba(177,105,46,.55);background:rgba(42,27,12,.78)}
+.updateWidget.error .updateMark{color:#ffc06d}.updateWidget.error .updateText{color:#e7c696}
+@keyframes updateSpin{to{transform:rotate(360deg)}}@keyframes updatePulse{from{opacity:.55}to{opacity:1}}
+@media(max-width:1450px), (max-height:820px){
+  .updateWidget{width:148px;height:42px;padding-inline:10px}.updateWidget.active{width:178px}.updateText{font-size:11px}
+}
+@media(max-width:1180px){
+  .updateWidget{width:44px;padding:0}.updateWidget .updateText,.updateWidget .updatePercent,.updateWidget .updateTrack{display:none!important}
+  .updateWidget.active{width:44px}.updateMark{margin:auto}
+}
+</style>
 </head>
 <body>
 <svg class="hiddenSymbols" aria-hidden="true">
@@ -359,13 +394,19 @@ html,body{min-width:760px;min-height:560px}
       <button class="navBtn" data-page="stats"><svg class="ico"><use href="#i-chart"/></svg><div class="navText"><strong>Статистика</strong><span>Твой прогресс</span></div></button>
       <button class="navBtn" data-page="settings"><svg class="ico"><use href="#i-settings"/></svg><div class="navText"><strong>Настройки</strong><span>Параметры приложения</span></div></button>
     </nav>
-    <div class="sidebarFoot"><div class="quote">A new language<br>is a new world.<small>Play. Learn. Understand.</small></div><div class="versionTiny">English1000 · v1.4</div></div>
+    <div class="sidebarFoot"><div class="quote">A new language<br>is a new world.<small>Play. Learn. Understand.</small></div><div class="versionTiny">English1000 · v1.5</div></div>
   </aside>
 
   <main class="main">
     <section class="hero"><div class="heroInner">
       <div><div class="slogan">ИГРАЙ. ПОНИМАЙ. ГОВОРИ.</div><h1>Game Vocabulary</h1><p>Изучай слова, которые действительно встречаются в играх.</p></div>
-      <div class="windowActions"><button class="winBtn fullBtn" id="fullscreenBtn">⛶ <span>Полный экран</span></button><button class="winBtn squareBtn" id="minimizeBtn" title="Свернуть">−</button><button class="winBtn squareBtn closeBtn" id="closeBtn" title="Закрыть">×</button></div>
+      <div class="windowActions">
+        <div class="updateWidget checking" id="updateWidget" aria-live="polite" title="Состояние обновлений">
+          <div class="updateTop"><span class="updateMark" id="updateMark">◌</span><span class="updateText" id="updateText">Проверяю обновления…</span><span class="updatePercent" id="updatePercent"></span></div>
+          <div class="updateTrack" id="updateTrack"><div class="updateFill" id="updateFill"></div></div>
+        </div>
+        <button class="winBtn fullBtn" id="fullscreenBtn">⛶ <span>Полный экран</span></button><button class="winBtn squareBtn" id="minimizeBtn" title="Свернуть">−</button><button class="winBtn squareBtn closeBtn" id="closeBtn" title="Закрыть">×</button>
+      </div>
     </div></section>
 
     <section class="content">
@@ -471,7 +512,7 @@ var KEY='english1000_progress_v1',LOG_KEY='english1000_safe_log_v1',LOG_LIMIT=15
 function logEvent(type,details){try{var lines=JSON.parse(localStorage.getItem(LOG_KEY)||'[]');lines.push(new Date().toISOString()+' | '+type+(details?' | '+details:''));if(lines.length>LOG_LIMIT)lines=lines.slice(-LOG_LIMIT);localStorage.setItem(LOG_KEY,JSON.stringify(lines));}catch(e){}}
 window.addEventListener('error',function(e){logEvent('js_error',(e.message||'error')+' @ '+(e.filename||'')+':'+(e.lineno||0));});
 window.addEventListener('unhandledrejection',function(e){logEvent('promise_error',String(e.reason||'unknown'));});
-logEvent('app_start','English1000 v1.4 browser='+navigator.userAgent);
+logEvent('app_start','English1000 v1.5 browser='+navigator.userAgent);
 
 var state={stats:{},correct:0,wrong:0,lesson:'1',last:null,direction:'en-ru',seq:0,gameCategory:'combat',favorites:{},autoSpeak:true};
 try{var saved=localStorage.getItem(KEY);if(saved)state=Object.assign(state,JSON.parse(saved));}catch(e){}
@@ -515,6 +556,44 @@ function rate(kind){var idx=currentIdx(),st=statFor(idx),days={forgot:1,hard:3,n
 document.querySelectorAll('.rateBtn').forEach(function(b){b.onclick=function(){rate(b.dataset.rate);};});
 favBtn.onclick=function(){var idx=currentIdx();if(state.favorites[idx])delete state.favorites[idx];else state.favorites[idx]=true;save();render();};
 
+var updateWidget=document.getElementById('updateWidget'),updateMark=document.getElementById('updateMark'),updateText=document.getElementById('updateText'),updatePercent=document.getElementById('updatePercent'),updateFill=document.getElementById('updateFill');
+var updateStatusFailures=0,updateStatusTimer=null;
+function paintUpdateStatus(st){
+ if(!updateWidget)return;
+ var state=(st&&st.state)||'checking',progress=Number(st&&st.progress);
+ updateWidget.className='updateWidget '+state;
+ updatePercent.textContent='';
+ updateFill.style.width='0%';
+ if(state==='up_to_date'){
+   updateMark.textContent='✓';updateText.textContent='Обновлений нет';
+ }else if(state==='available'){
+   updateMark.textContent='↓';updateText.textContent=st.latest_version?'Есть обновление v'+st.latest_version:'Есть обновление';
+ }else if(state==='downloading'){
+   updateMark.textContent='↓';updateWidget.classList.add('active');
+   updateText.textContent=st.message||'Скачивание обновления';
+   if(isFinite(progress)&&progress>=0){progress=Math.max(0,Math.min(100,progress));updatePercent.textContent=Math.round(progress)+'%';updateFill.style.width=progress+'%';}
+   else{updateFill.style.width='35%';}
+ }else if(state==='installing'){
+   updateMark.textContent='↻';updateWidget.classList.add('active','installing');updateText.textContent=st.message||'Установка обновления';updatePercent.textContent='';
+ }else if(state==='error'||state==='offline'){
+   updateMark.textContent='!';updateWidget.className='updateWidget error';updateText.textContent=st&&st.message?st.message:'Не удалось проверить';
+ }else{
+   updateMark.textContent='◌';updateWidget.className='updateWidget checking';updateText.textContent='Проверяю обновления…';
+ }
+}
+async function pollUpdateStatus(){
+ try{
+   var r=await fetch('http://127.0.0.1:18473/status?t='+Date.now(),{cache:'no-store'});
+   if(!r.ok)throw new Error('HTTP '+r.status);
+   var st=await r.json();updateStatusFailures=0;paintUpdateStatus(st);
+ }catch(e){
+   updateStatusFailures++;
+   if(updateStatusFailures>=3)paintUpdateStatus({state:'offline',message:'Статус обновлений недоступен'});
+ }
+ clearTimeout(updateStatusTimer);updateStatusTimer=setTimeout(pollUpdateStatus,650);
+}
+paintUpdateStatus({state:'checking'});pollUpdateStatus();
+
 var toast=document.getElementById('toast'),toastTimer=null;
 function showToast(msg){toast.textContent=msg;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){toast.classList.remove('show');},2200);}
 document.querySelectorAll('.navBtn').forEach(function(b){b.onclick=function(){var page=b.dataset.page;if(page==='game'){showToast('Ты уже в Game Vocabulary.');return;}if(page==='settings'){openSettings();return;}if(page==='favorites'){var favs=Object.keys(state.favorites).map(Number).filter(function(x){return WORDS[x];});if(!favs.length){showToast('В избранном пока нет слов.');return;}state.gameCategory='all';state.session=favs.slice(0,20);state.sessionPos=0;document.querySelectorAll('.catBtn').forEach(function(x){x.classList.toggle('active',x.dataset.cat==='all');});render();showToast('Показываю избранные слова.');return;}if(page==='stats'){var all=CATEGORY_POOLS.all,done=0;all.forEach(function(x){if(mastered(x))done++;});showToast('Изучено игровых слов: '+done+' из '+all.length+'.');return;}showToast('Режим «'+b.querySelector('strong').textContent+'» появится в одной из следующих версий.');};});
@@ -540,7 +619,7 @@ document.getElementById('confirmReset').onclick=function(){state={stats:{},corre
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){if(modal.classList.contains('open')){closeSettings();return;}if(document.fullscreenElement){document.exitFullscreen();return;}}if(modal.classList.contains('open'))return;if(e.key==='ArrowLeft')move(-1);else if(e.key==='ArrowRight')move(1);else if(e.code==='Space'){e.preventDefault();speakCurrent();}else if(e.key==='1')rate('forgot');else if(e.key==='2')rate('hard');else if(e.key==='3')rate('normal');else if(e.key==='4')rate('easy');});
 
-var APP_VERSION='1.4';
+var APP_VERSION='1.5';
 (function enableLiveUpdates(){var retry=null;function connect(){try{var es=new EventSource('http://127.0.0.1:18473/events');es.addEventListener('update',function(ev){var d={};try{d=JSON.parse(ev.data||'{}');logEvent('live_update','to='+(d.version||'?'));}catch(e){}es.close();setTimeout(function(){try{var u=new URL(location.href);u.searchParams.set('v',d.version||APP_VERSION);u.searchParams.set('t',Date.now());location.replace(u.toString());}catch(e){location.reload();}},100);});es.onerror=function(){try{es.close();}catch(e){}clearTimeout(retry);retry=setTimeout(connect,1500);};}catch(e){clearTimeout(retry);retry=setTimeout(connect,1500);}}connect();})();
 
 makeSession();render();
